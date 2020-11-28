@@ -10,34 +10,70 @@
 #' @return a ggplot2 object
 #' @import ggplot2
 #' @importFrom dplyr pull
-#' @export
 #'
 #' @examples
 #' \dontrun{
-#' plot_wdi_dist_col()
+#'  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
+#'  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{groups}}, country, highlight, p)
 #' }
-plot_wdi_dist_col <- function(wdi_data, ind, groups, country, highlight, p = 0) {
+plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, p = 0) {
 
-  ggplot(aes(x = {{ind}}, fill = {{groups}}), data = wdi_data) +
-    facet_wrap(vars({{groups}}), ncol = 1, scales = "free_y") +
-    geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
-    geom_rug() +
-    geom_vline(aes(xintercept = {{highlight}}), linetype = "dotted") +
-    geom_text(aes(x = {{highlight}}, y = Inf, label = {{country}}), vjust = 1, fontface = "bold") +
-    geom_text(aes(x = {{highlight}}, y = 0, label = tailor_scales(pull(wdi_data, {{ind}}))({{highlight}})), vjust = -0.1, fontface = "bold") +
-    ggthemes::theme_tufte() +
-    scale_x_continuous(
-      name = attr(wdi_data %>% pull({{ind}}), "label"),
-      trans = scales::modulus_trans(p),
-      labels = tailor_scales(pull(wdi_data, {{ind}})),
-      breaks = modulus_breaks(p),
-      guide = guide_axis(check.overlap = TRUE),
-      expand = c(0, 0)
-    ) +
-    scale_fill_brewer(palette = "Dark2") +
-    theme(legend.position = "none") +
-    ylab("Density") +
-    labs(caption = ifelse(p != 1, glue::glue("* Transformed scale modulus({p})"), ""))
+  wdi_data <- wdi_data %>%
+    group_by({{groups}}) %>%
+    mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
+    ungroup()
+
+  ggplot(aes(x = {{ ind }}, fill = {{ groups }}), data = wdi_data) +
+  facet_wrap(vars({{ groups }}), ncol = 1, scales = "free_y") +
+  geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
+  geom_rug() +
+  geom_vline(aes(xintercept = {{ highlight }}), linetype = "dotted") +
+  ggrepel::geom_text_repel(
+    aes(
+      x = {{ highlight }},
+      y = Inf,
+      # using this, two highlights in a facet would never be in the line center
+      #hjust = custom_hjust,
+      label = paste0(
+        {{ country }}, "\n",
+        # tailor the scale function using all the data in {ind} but apply it
+        # only to highlight data
+        tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+      )
+    ),
+    #direction = "y", # only let ggrepel to adjust horizontally
+    point.padding = NA, # do not repel if there is only 1 highlight in a facet
+    vjust = 1,
+    hjust = 0.5,
+    lineheight = 0.75,
+    fontface = "bold"
+  ) +
+  #' There is an issue here, if put in separate geoms, vjust can end up
+  #' being inconsistent, so let's put them together in one geom even though
+  #' I would have preferred two separate geoms with y = 0 and y = Inf
+  # ggrepel::geom_text_repel(
+  #   aes(
+  #     x = {{ highlight }},
+  #     y = 0,
+  #     label = tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+  #   ),
+  #   vjust = -0.1,
+  #   hjust = 0,
+  #   fontface = "bold"
+  # ) +
+  ggthemes::theme_tufte() +
+  scale_x_continuous(
+    name = attr(wdi_data %>% pull({{ ind }}), "label"),
+    trans = scales::modulus_trans(p),
+    labels = tailor_scales(pull(wdi_data, {{ ind }})),
+    breaks = modulus_breaks(p),
+    guide = guide_axis(check.overlap = TRUE),
+    expand = c(0, 0)
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  theme(legend.position = "none") +
+  ylab("Density") +
+  labs(caption = ifelse(p != 1, glue::glue("* Transformed scale modulus({p})"), ""))
 }
 
 #' Download WDI::WDI() data for a single indicator and get the latest value per
@@ -119,7 +155,7 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 
-  plot_wdi_dist_col(wdi_data, plot_ind, {{groups}}, country, highlight, p)
+  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{groups}}, country, highlight, p)
 }
 
 
@@ -145,4 +181,3 @@ tailor_scales <- function(plot_data) {
   }
   return(scales::comma_format(accuracy = 1))
 }
-
