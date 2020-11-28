@@ -5,6 +5,7 @@
 #' @param groups variable in wdi_data to use as facets (either region or income)
 #' @param country variable in wdi_data to use as country names
 #' @param highlight variable in wdi_data with the value of countries to highglight
+#' @param year variable in wdi_data with the value of the year for each point
 #' @param p Transformation exponent, λ, as in scales::modulus_trans
 #'
 #' @return a ggplot2 object
@@ -16,12 +17,12 @@
 #'  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 #'  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{groups}}, country, highlight, p)
 #' }
-plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, p = 0) {
+plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, year, p = 0) {
 
-  wdi_data <- wdi_data %>%
-    group_by({{groups}}) %>%
-    mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
-    ungroup()
+  # wdi_data <- wdi_data %>%
+  #   group_by({{groups}}) %>%
+  #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
+  #   ungroup()
 
   ggplot(aes(x = {{ ind }}, fill = {{ groups }}), data = wdi_data) +
   facet_wrap(vars({{ groups }}), ncol = 1, scales = "free_y") +
@@ -63,7 +64,11 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, 
   # ) +
   ggthemes::theme_tufte() +
   scale_x_continuous(
-    name = attr(wdi_data %>% pull({{ ind }}), "label"),
+    name = paste0(
+      attr(wdi_data %>% pull({{ ind }}), "label"), "\nYear ",
+      wdi_data %>% pull({{ year }}) %>% vctrs::vec_slice(i = 1), " *"
+      # TODO: find better way to signal a few other years are there as well
+    ),
     trans = scales::modulus_trans(p),
     labels = tailor_scales(pull(wdi_data, {{ ind }})),
     breaks = modulus_breaks(p),
@@ -73,7 +78,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, 
   scale_fill_brewer(palette = "Dark2") +
   theme(legend.position = "none") +
   ylab("Density") +
-  labs(caption = ifelse(p != 1, glue::glue("* Transformed scale modulus({p})"), ""))
+  labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
 }
 
 #' Download WDI::WDI() data for a single indicator and get the latest value per
@@ -151,11 +156,11 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               country = "all",
                               p = 0) {
 
-  plot_ind <- region <- highlight <- NULL # or use the .data pronoun
+  plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 
-  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{groups}}, country, highlight, p)
+  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{groups}}, country, highlight, year, p)
 }
 
 

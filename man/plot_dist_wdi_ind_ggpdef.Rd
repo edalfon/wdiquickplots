@@ -4,7 +4,15 @@
 \alias{plot_dist_wdi_ind_ggpdef}
 \title{Plot a WDI indicator}
 \usage{
-plot_dist_wdi_ind_ggpdef(wdi_data, ind, groups, country, highlight, p = 0)
+plot_dist_wdi_ind_ggpdef(
+  wdi_data,
+  ind,
+  groups,
+  country,
+  highlight,
+  year,
+  p = 0
+)
 }
 \arguments{
 \item{wdi_data}{data.frame as returned by latest_wdi_ind}
@@ -16,6 +24,8 @@ plot_dist_wdi_ind_ggpdef(wdi_data, ind, groups, country, highlight, p = 0)
 \item{country}{variable in wdi_data to use as country names}
 
 \item{highlight}{variable in wdi_data with the value of countries to highglight}
+
+\item{year}{variable in wdi_data with the value of the year for each point}
 
 \item{p}{Transformation exponent, λ, as in scales::modulus_trans}
 }
