@@ -1,89 +1,3 @@
-#' Plot a WDI indicator
-#'
-#' @param wdi_data data.frame as returned by latest_wdi_ind
-#' @param ind variable in wdi_data to plot
-#' @param groups variable in wdi_data to use as facets (either region or income)
-#' @param country variable in wdi_data to use as country names
-#' @param highlight variable in wdi_data with the value of countries to highglight
-#' @param year variable in wdi_data with the value of the year for each point
-#' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
-#'
-#' @return a ggplot2 object
-#' @import ggplot2
-#' @importFrom dplyr pull
-#'
-#' @examples
-#' \dontrun{
-#' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
-#' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ groups }}, country, highlight, p)
-#' }
-plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, year, p = 0) {
-
-  # wdi_data <- wdi_data %>%
-  #   group_by({{groups}}) %>%
-  #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
-  #   ungroup()
-
-  ggplot(aes(x = {{ ind }}, fill = {{ groups }}), data = wdi_data) +
-    facet_wrap(vars({{ groups }}), ncol = 1, scales = "free_y") +
-    geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
-    geom_rug() +
-    geom_vline(aes(xintercept = {{ highlight }}), linetype = "dotted") +
-    ggrepel::geom_text_repel(
-      aes(
-        x = {{ highlight }},
-        y = Inf,
-        # using this, two highlights in a facet would never be in the line center
-        # hjust = custom_hjust,
-        label = paste0(
-          {{ country }}, "\n",
-          # tailor the scale function using all the data in {ind} but apply it
-          # only to highlight data
-          tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
-        )
-      ),
-      # direction = "y", # only let ggrepel to adjust horizontally
-      point.padding = NA, # do not repel if there is only 1 highlight in a facet
-      vjust = 1,
-      hjust = 0.5,
-      lineheight = 0.75,
-      fontface = "bold"
-    ) +
-    #' There is an issue here, if put in separate geoms, vjust can end up
-    #' being inconsistent, so let's put them together in one geom even though
-    #' I would have preferred two separate geoms with y = 0 and y = Inf
-    # ggrepel::geom_text_repel(
-    #   aes(
-    #     x = {{ highlight }},
-    #     y = 0,
-    #     label = tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
-    #   ),
-    #   vjust = -0.1,
-    #   hjust = 0,
-    #   fontface = "bold"
-    # ) +
-    ggthemes::theme_tufte() +
-    scale_x_continuous(
-      name = paste0(
-        attr(wdi_data %>% pull({{ ind }}), "label"), "\nYear ",
-        wdi_data %>% pull({{ year }}) %>% vctrs::vec_slice(i = 1), " *"
-        # TODO: find better way to signal a few other years are there as well
-      ),
-      trans = scales::modulus_trans(p),
-      labels = tailor_scales(pull(wdi_data, {{ ind }})),
-      breaks = modulus_breaks(p),
-      guide = guide_axis(check.overlap = TRUE),
-      expand = c(0, 0)
-    ) +
-    scale_fill_brewer(
-      palette = ifelse("income" %in% names(dplyr::select(wdi_data, {{ groups }})), "Blues", "Dark2"),
-      direction = -1
-    ) +
-    theme(legend.position = "none") +
-    ylab("Density") +
-    labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
-}
-
 #' Download WDI::WDI() data for a single indicator and get the latest value per
 #' country
 #'
@@ -135,6 +49,95 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     )))
 }
 
+#' Plot a WDI indicator
+#'
+#' @param wdi_data data.frame as returned by latest_wdi_ind
+#' @param ind variable in wdi_data to plot
+#' @param groups variable in wdi_data to use as facets (either region or income)
+#' @param country variable in wdi_data to use as country names
+#' @param highlight variable in wdi_data with the value of countries to highglight
+#' @param year variable in wdi_data with the value of the year for each point
+#' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
+#'
+#' @return a ggplot2 object
+#' @importFrom dplyr select pull
+#' @import ggplot2
+#'
+#' @examples
+#' \dontrun{
+#' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
+#' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ groups }}, country, highlight, p)
+#' }
+plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, year, p = 0) {
+
+  # wdi_data <- wdi_data %>%
+  #   group_by({{groups}}) %>%
+  #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
+  #   ungroup()
+
+  ggplot(aes(x = {{ ind }}, fill = {{ groups }}), data = wdi_data) +
+    facet_wrap(vars({{ groups }}), ncol = 1, scales = "free_y") +
+    geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
+    geom_rug() +
+    geom_vline(aes(xintercept = {{ highlight }}), linetype = "dotted") +
+    ggrepel::geom_text_repel(
+      aes(
+        x = {{ highlight }},
+        y = Inf,
+        # using this, two highlights in a facet would never be in the line center
+        # hjust = custom_hjust,
+        label = paste0(
+          {{ country }}, "\n",
+          # tailor the scale function using all the data in {ind} but apply it
+          # only to highlight data
+          tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+        )
+      ),
+      # direction = "y", # only let ggrepel to adjust horizontally
+      point.padding = NA, # do not repel if there is only 1 highlight in a facet
+      vjust = 1,
+      hjust = 0.5,
+      lineheight = 0.75,
+      fontface = "bold"
+    ) +
+    #' There is an issue here, if put in separate geoms, vjust can end up
+    #' being inconsistent, so let's put them together in one geom even though
+    #' I would have preferred two separate geoms with y = 0 and y = Inf
+    # ggrepel::geom_text_repel(
+    #   aes(
+    #     x = {{ highlight }},
+    #     y = 0,
+    #     label = tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+    #   ),
+    #   vjust = -0.1,
+    #   hjust = 0,
+  #   fontface = "bold"
+  # ) +
+  ggthemes::theme_tufte() +
+    scale_x_continuous(
+      name = paste0(
+        attr(wdi_data %>% pull({{ ind }}), "label"), "\nYear ",
+        wdi_data %>% pull({{ year }}) %>% vctrs::vec_slice(i = 1), " *"
+        # TODO: find better way to signal a few other years are there as well
+      ),
+      trans = scales::modulus_trans(p),
+      labels = tailor_scales(pull(wdi_data, {{ ind }})),
+      breaks = modulus_breaks(p),
+      guide = guide_axis(check.overlap = TRUE),
+      expand = c(0, 0)
+    ) +
+    scale_fill_brewer(
+      palette = ifelse(
+        test = "income" %in% names(select(wdi_data, {{ groups }})),
+        yes = "RdYlGn",
+        no = "Dark2"),
+      direction = -1
+    ) +
+    theme(legend.position = "none") +
+    ylab("Density") +
+    labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
+}
+
 #' Plot the distribution (density) of a single indicator using WDI data,
 #' downloading the data as necessary for the period indicated by start and end,
 #' and keeping only the latest data point available for each country
@@ -162,6 +165,64 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 
   plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ groups }}, country, highlight, year, p)
+}
+
+#' Plot a WDI indicator as an interactive bar-plot (powered by plotly)
+#'
+#' @inheritParams latest_wdi_ind
+#'
+#' @return a plotly object
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' plot_bar_wdi_ind()
+#' }
+plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+                              highlight_countries = c("Colombia", "Germany"),
+                              start = lubridate::year(Sys.Date()) - 10,
+                              end = lubridate::year(Sys.Date()),
+                              country = "all",
+                              p = 0) {
+  # TODO: refactor plot
+  # TODO: apply transformation. Perhaps use a button or dropdown to let the
+  #       user customize the transformation parameter p interactively
+  #       https://plotly.com/r/dropdowns/
+  # TODO: let filter regions and income groups
+  # TODO: let customize colors
+  # TODO: let the user decide whether horizontal or vertical bar plot
+
+  plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
+
+  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
+
+  wdi_data <- wdi_data %>%
+    mutate(text = dplyr::case_when(
+      !is.na(highlight) ~ paste0(country, " [", scales::comma(highlight), "]")
+    )) %>%
+    mutate(color = dplyr::case_when(!is.na(highlight) ~ "red", TRUE ~ "blue"))
+
+  plotly::plot_ly(
+    data = wdi_data,
+    x = ~plot_ind,
+    y = ~reorder(country, plot_ind),
+    text = ~text,
+    textposition = 'outside',
+    textfont = list(face = "bold", color = '#000000', size = 14),
+    hovertemplate = paste('%{y}<br>%{x:,.0f}<br>'), # TODO: customize scale
+    # https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format
+    type = 'bar',
+    orientation = 'v',
+    marker = list(color = ~color)
+  ) %>%
+    plotly::layout(
+      # using textfont above would not let you override limit
+      # https://stackoverflow.com/questions/62094773/is-it-possible-to-override
+      # -font-size-limit-on-labels-in-r-plotly-bar-charts
+      uniformtext=list(minsize=14, mode='show'),
+      xaxis = list(title = attr(wdi_data %>% pull(plot_ind), "label")),
+      yaxis = list(title = NA)
+    )
 }
 
 

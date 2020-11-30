@@ -21,4 +21,5 @@ Imports:
     scales,
     labeling,
     ggrepel,
-    vctrs
+    vctrs,
+    plotly

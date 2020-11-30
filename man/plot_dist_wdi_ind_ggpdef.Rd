@@ -27,7 +27,7 @@ plot_dist_wdi_ind_ggpdef(
 
 \item{year}{variable in wdi_data with the value of the year for each point}
 
-\item{p}{Transformation exponent, λ, as in scales::modulus_trans}
+\item{p}{Transformation exponent, <U+03BB>, as in scales::modulus_trans}
 }
 \value{
 a ggplot2 object

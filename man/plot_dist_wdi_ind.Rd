@@ -29,7 +29,7 @@ plot_dist_wdi_ind(
 
 \item{country}{subset of countries to download data. Default to "all"}
 
-\item{p}{Transformation exponent, λ, as in scales::modulus_trans}
+\item{p}{Transformation exponent, <U+03BB>, as in scales::modulus_trans}
 }
 \value{
 a ggplot2 object

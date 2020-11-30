@@ -2,6 +2,7 @@
 
 export("%>%")
 export(latest_wdi_ind)
+export(plot_bar_wdi_ind)
 export(plot_dist_wdi_ind)
 import(ggplot2)
 importFrom(dplyr,filter)
