@@ -2,8 +2,7 @@
 % Please edit documentation in R/quickplots.R
 \name{latest_wdi_ind}
 \alias{latest_wdi_ind}
-\title{Download WDI::WDI() data for a single indicator and get the latest value per
-country}
+\title{Get latest data for a single indicator per country}
 \usage{
 latest_wdi_ind(
   indicator = "NY.GDP.PCAP.KD",
@@ -30,8 +29,7 @@ data.frame with columns country, year, plot_ind, region, income,
         case takes the value of plot_ind
 }
 \description{
-Download WDI::WDI() data for a single indicator and get the latest value per
-country
+Get latest data for a single indicator per country
 }
 \examples{
 \dontrun{

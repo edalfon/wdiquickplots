@@ -7,7 +7,7 @@
 plot_dist_wdi_ind_ggpdef(
   wdi_data,
   ind,
-  groups,
+  facets,
   country,
   highlight,
   year,
@@ -19,7 +19,7 @@ plot_dist_wdi_ind_ggpdef(
 
 \item{ind}{variable in wdi_data to plot}
 
-\item{groups}{variable in wdi_data to use as facets (either region or income)}
+\item{facets}{variable in wdi_data to use as facets (either region or income)}
 
 \item{country}{variable in wdi_data to use as country names}
 

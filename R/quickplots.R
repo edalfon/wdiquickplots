@@ -1,5 +1,4 @@
-#' Download WDI::WDI() data for a single indicator and get the latest value per
-#' country
+#' Wrapper around WDI::WDI() to download data for a single indicator
 #'
 #' @param indicator character of length 1 with the indicator code
 #' @param highlight_countries character vector with country names to highlight
@@ -11,20 +10,20 @@
 #'         highlight. highlight = NA, except for highlight countries in which
 #'         case takes the value of plot_ind
 #'
-#' @importFrom dplyr select filter mutate group_by ungroup slice_max
 #' @importFrom tidyr drop_na
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' latest_wdi_ind("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
+#' download_wdi_ind("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
 #' }
 #'
-latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                            highlight_countries = c(""),
                            start = lubridate::year(Sys.Date()) - 10,
                            end = lubridate::year(Sys.Date()),
                            country = "all") {
+
   year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
 
   wdi_data <- WDI::WDI(
@@ -39,9 +38,6 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     select(country, year, plot_ind, region, income) %>%
     drop_na() %>%
     filter(region != "Aggregates") %>%
-    group_by(country) %>%
-    slice_max(order_by = year) %>%
-    ungroup() %>%
     mutate(highlight = ifelse(country %in% highlight_countries, plot_ind, NA)) %>%
     mutate(income = factor(income, levels = c(
       "Aggregates", "High income", "Upper middle income", "Lower middle income",
@@ -49,34 +45,65 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     )))
 }
 
+#' Get latest data for a single indicator per country
+#'
+#' @inheritParams download_wdi_ind
+#'
+#' @return data.frame with columns country, year, plot_ind, region, income,
+#'         highlight. highlight = NA, except for highlight countries in which
+#'         case takes the value of plot_ind
+#'
+#' @importFrom tidyr drop_na
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' latest_wdi_ind("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
+#' }
+#'
+latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+                           highlight_countries = c(""),
+                           start = lubridate::year(Sys.Date()) - 10,
+                           end = lubridate::year(Sys.Date()),
+                           country = "all") {
+
+  year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
+
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+
+  wdi_data %>%
+    group_by(country) %>%
+    dplyr::slice_max(order_by = year) %>%
+    ungroup()
+}
+
 #' Plot a WDI indicator
 #'
 #' @param wdi_data data.frame as returned by latest_wdi_ind
 #' @param ind variable in wdi_data to plot
-#' @param groups variable in wdi_data to use as facets (either region or income)
+#' @param facets variable in wdi_data to use as facets (either region or income)
 #' @param country variable in wdi_data to use as country names
 #' @param highlight variable in wdi_data with the value of countries to highglight
 #' @param year variable in wdi_data with the value of the year for each point
 #' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
 #'
 #' @return a ggplot2 object
-#' @importFrom dplyr select pull
 #' @import ggplot2
 #'
 #' @examples
 #' \dontrun{
 #' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
-#' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ groups }}, country, highlight, p)
+#' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, p)
 #' }
-plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, year, p = 0) {
+plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight, year, p = 0) {
 
   # wdi_data <- wdi_data %>%
-  #   group_by({{groups}}) %>%
+  #   group_by({{facets}}) %>%
   #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
   #   ungroup()
 
-  ggplot(aes(x = {{ ind }}, fill = {{ groups }}), data = wdi_data) +
-    facet_wrap(vars({{ groups }}), ncol = 1, scales = "free_y") +
+  ggplot(aes(x = {{ ind }}, fill = {{ facets }}), data = wdi_data) +
+    facet_wrap(vars({{ facets }}), ncol = 1, scales = "free_y") +
     geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
     geom_rug() +
     geom_vline(aes(xintercept = {{ highlight }}), linetype = "dotted") +
@@ -128,7 +155,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, 
     ) +
     scale_fill_brewer(
       palette = ifelse(
-        test = "income" %in% names(select(wdi_data, {{ groups }})),
+        test = "income" %in% names(select(wdi_data, {{ facets }})),
         yes = "RdYlGn",
         no = "Dark2"),
       direction = -1
@@ -142,8 +169,8 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, 
 #' downloading the data as necessary for the period indicated by start and end,
 #' and keeping only the latest data point available for each country
 #'
-#' @inheritParams latest_wdi_ind
-#' @param groups whether to show facets per region or income
+#' @inheritParams download_wdi_ind
+#' @param facets whether to show facets per region or income
 #' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
 #'
 #' @return a ggplot2 object
@@ -155,7 +182,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, groups, country, highlight, 
 #' }
 plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               highlight_countries = c("Colombia", "Germany"),
-                              groups = region,
+                              facets = region,
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
@@ -164,12 +191,12 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 
-  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ groups }}, country, highlight, year, p)
+  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, year, p)
 }
 
 #' Plot a WDI indicator as an interactive bar-plot (powered by plotly)
 #'
-#' @inheritParams latest_wdi_ind
+#' @inheritParams download_wdi_ind
 #'
 #' @return a plotly object
 #' @export
@@ -182,8 +209,7 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               highlight_countries = c("Colombia", "Germany"),
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
-                              country = "all",
-                              p = 0) {
+                              country = "all") {
   # TODO: refactor plot
   # TODO: apply transformation. Perhaps use a button or dropdown to let the
   #       user customize the transformation parameter p interactively
@@ -225,6 +251,151 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     )
 }
 
+#' Line plot with facets showing how the indicator has changed over time
+#' in the highlight_countries, within regions or income groups (facets)
+#'
+#' We use the super cool gghighlight::gghighlight package to disentangle the
+#' spaghetti plot and highlight selected countries in each facet
+#'
+#' @inheritParams download_wdi_ind
+#' @param facets variable to use for facets. Either region or income
+#' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
+#'
+#' @return ggplot object
+#' @export
+#'
+#' @examples
+plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
+                              highlight_countries = c("Colombia", "Germany"),
+                              facets = region,
+                              start = lubridate::year(Sys.Date()) - 10,
+                              end = lubridate::year(Sys.Date()),
+                              country = "all",
+                              p = 0) {
+
+  region <- year <- plot_ind <- highlight <- NULL
+
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+
+  ggplot(aes(x = year, y = plot_ind, color = country), data = wdi_data) +
+    geom_point() +
+    geom_line(aes(group = country), size = 1.5) +
+    facet_wrap(vars({{facets}})) +
+    gghighlight::gghighlight(
+      !is.na(highlight),
+      calculate_per_facet = TRUE,
+      use_direct_label = TRUE,
+      label_params = list(fill = "white", point.padding = 0.1, direction = "y")
+    ) +
+    scale_y_continuous(
+      trans = scales::modulus_trans(p),
+      labels = tailor_scales(pull(wdi_data, plot_ind)),
+      breaks = modulus_breaks(p),
+      guide = guide_axis(check.overlap = TRUE),
+      expand = c(0, 0)
+    ) +
+    scale_color_brewer(palette = "Set1") +
+    ggthemes::theme_tufte() +
+    theme(panel.border = element_rect(colour = "grey", fill = NA))
+}
+
+#' Line plot (plotly-powered) the indicator over time (year) for the
+#' highlight_countries only
+#'
+#' @inheritParams download_wdi_ind
+#'
+#' @return plotly object
+#' @export
+#'
+#' @examples
+plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
+                              highlight_countries = c("Colombia", "Germany"),
+                              start = lubridate::year(Sys.Date()) - 10,
+                              end = lubridate::year(Sys.Date()),
+                              country = "all") {
+
+  # TODO: allow transformation passing p as in otherss
+
+  year <- plot_ind <- highlight <- NULL
+
+  # TODO: here you could actually download only the highlight countries
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- wdi_data %>%
+    filter(!is.na(highlight)) %>%
+    group_by(country) %>%
+    mutate(direct_labels = case_when(
+      year == max(year, na.rm = TRUE) ~ paste0(country, "\n", plot_ind),
+      year == min(year, na.rm = TRUE) ~ as.character(plot_ind)
+    )) %>%
+    dplyr::arrange(country, year) # I hate that plotly makes you arrange it
+
+  plotly::plot_ly(
+    data = wdi_data,
+    x = ~ year,
+    y = ~ plot_ind,
+    # groups and assigns different colors in one step
+    color = ~ country,
+    # name = 'all_terms',
+    type = 'scatter',
+    mode = 'lines+markers',
+    line = list(width = 3)
+  ) %>%
+    plotly::add_text(
+      text = ~ direct_labels,
+      textfont = list(size = 12),
+      textposition = "top"
+    ) %>%
+    plotly::layout(
+      showlegend = FALSE,
+      yaxis = list(title = attr(wdi_data %>% pull(plot_ind), "label")),
+      yaxis = list(title = NA)
+    )
+}
+
+#' Spaghetti plot that no-one really want to see (nor should want to see, ever)
+#'
+#' @inheritParams download_wdi_ind
+#'
+#' @return a dygraphs plot
+#' @export
+#'
+#' @examples
+plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
+                              highlight_countries = c("Colombia", "Germany"),
+                              start = lubridate::year(Sys.Date()) - 10,
+                              end = lubridate::year(Sys.Date()),
+                              country = "all") {
+
+  # TODO: allow transformation passing p as in otherss
+
+  year <- plot_ind <- highlight <- region <- income <- NULL
+
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+
+  wdi_data_wide <- wdi_data %>%
+    select(-region, -income, -highlight) %>%
+    tidyr::pivot_wider(names_from = country, values_from = plot_ind) %>%
+    dplyr::arrange(year)
+
+  dy_spaghetti <- dygraphs::dygraph(
+    data = wdi_data_wide,
+    xlab = "",
+    ylab = attr(wdi_data$plot_ind, "label")
+  ) %>%
+    dygraphs::dyLegend(width = 700) %>%
+    dygraphs::dyOptions(drawPoints = TRUE, pointSize = 2) %>%
+    dygraphs::dyHighlight(
+      highlightCircleSize = 5,
+      highlightSeriesBackgroundAlpha = 0.1,
+      highlightSeriesOpts =  list(strokeWidth = 5),
+      hideOnMouseOut = TRUE
+    ) %>%
+    dygraphs::dyRangeSelector()
+  # to show legend only for highlighted series. Sonst it is even more messy
+  dy_spaghetti$x$css <- ".dygraph-legend > span {display:none;}
+                         .dygraph-legend > span.highlight { display: inline; }"
+  dy_spaghetti
+}
 
 modulus_breaks <- function(p_default, n.breaks_default = 10) {
   function(limits, p = p_default, n.breaks = n.breaks_default) {

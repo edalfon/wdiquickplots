@@ -22,4 +22,6 @@ Imports:
     labeling,
     ggrepel,
     vctrs,
-    plotly
+    plotly,
+    gghighlight,
+    dygraphs
