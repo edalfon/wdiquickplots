@@ -88,7 +88,6 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
 #'
 #' @return a ggplot2 object
-#' @import ggplot2
 #'
 #' @examples
 #' \dontrun{
