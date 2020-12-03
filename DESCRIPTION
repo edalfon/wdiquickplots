@@ -27,3 +27,7 @@ Imports:
     dygraphs,
     gganimate,
     zoo
+Suggests: 
+    testthat,
+    spelling
+Language: en-US
