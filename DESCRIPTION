@@ -24,4 +24,6 @@ Imports:
     vctrs,
     plotly,
     gghighlight,
-    dygraphs
+    dygraphs,
+    gganimate,
+    zoo

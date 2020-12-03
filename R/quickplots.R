@@ -396,6 +396,112 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
   dy_spaghetti
 }
 
+
+#' Race bar plot
+#'
+#' @inheritParams download_wdi_ind
+#'
+#' @return gganimate
+#' @export
+#'
+#' @examples
+plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
+                                   highlight_countries = c("Colombia", "Germany"),
+                                   start = lubridate::year(Sys.Date()) - 10,
+                                   end = lubridate::year(Sys.Date()),
+                                   country = "all") {
+
+  # TODO: allow transformation passing p as in otherss
+
+  year <- plot_ind <- highlight <- region <- income <- highlight_country <-
+    highlight_country_label <- highlight_dummy <- plot_ind_fill <- NULL
+
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+
+  wdi_race_data <- wdi_data %>%
+    # most probably, there will be missing values in some countries for some years
+    # so here's a controversial decision to make the animation look good
+    # let's fill missing values for each country, by interpolating values in
+    # the gaps and filling with the first or last value available
+    tidyr::complete(country, year) %>% # not there will be NA in plot_ind
+    group_by(country) %>%
+    arrange(country, year) %>%
+    mutate(plot_ind_fill = zoo::na.approx(plot_ind, na.rm = FALSE)) %>%
+    tidyr::fill(plot_ind_fill, .direction = "downup") %>%
+    mutate(highlight = zoo::na.approx(highlight, na.rm = FALSE)) %>%
+    tidyr::fill(highlight, .direction = "downup") %>%
+    ungroup() %>%
+    # Try to be transparent about it and signal the country name with an *
+    # whenever there was a missing value
+    mutate(country_label = ifelse(is.na(plot_ind), paste0(country, "*"), country)) %>%
+    # leave unhighlighted countries as NA, then the fill color will be grey
+    mutate(highlight_country = case_when(!is.na(highlight) ~ country)) %>%
+    mutate(highlight_country_label = case_when(
+      !is.na(highlight) ~ paste0(country_label, " (", highlight, ")"), TRUE ~ ""
+    )) %>%
+    mutate(highlight_dummy = case_when(!is.na(highlight) ~ 1, TRUE ~ 0.77)) %>%
+    # Now calculate country rank in every year, for the animated plot
+    group_by(year) %>%
+    arrange(year, -plot_ind_fill) %>%
+    mutate(rank = 1:n()) %>%
+    mutate(rank = -rank) %>%
+    ungroup()
+
+  anim <- wdi_race_data %>%
+    #filter(year %in% 2011:2011) %>%
+    #filter(country %in% unique(wdi_race_data$country)[1:30]) %>%
+    ggplot() +
+    facet_wrap(vars(year)) +
+    geom_rect(aes(
+      xmin = 0,
+      xmax = plot_ind_fill,
+      ymin = rank - .5,
+      ymax = rank + .5,
+      fill = highlight_country,
+      alpha = highlight_dummy
+    )) +
+    geom_text(aes(
+      label = country,
+      y = rank,
+      x = 0,
+      hjust = 1
+    ), size = 1.2) +
+    geom_text(aes(
+      label = highlight_country_label,
+      y = rank,
+      x = plot_ind_fill
+    ), hjust = 0) +
+    scale_y_discrete("", expand = c(0, 0)) +
+    scale_x_continuous(
+      name = attr(wdi_data$plot_ind, "label"),
+      n.breaks = 10,
+      guide = guide_axis(check.overlap = TRUE)
+    ) +
+    ggthemes::theme_tufte() +
+    theme(legend.position = "none") +
+    theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+    facet_null() +
+    aes(group = country) +
+    labs(title = 'Year: {frame_time}') +
+    gganimate::transition_time(year) +
+    #labs(title = 'Year: {closest_state}', y = "") +
+    #gganimate::transition_states(states = year, transition_length = 1, state_length = 1) +
+    gganimate::ease_aes('cubic-in-out')
+
+  gganimate::animate(
+    anim,
+    nframes = 250,
+    fps = 25,
+    start_pause = 25,
+    end_pause = 25,
+    width = 350,
+    height = 550,
+    renderer = gganimate::gifski_renderer()
+  )
+}
+
+
+
 modulus_breaks <- function(p_default, n.breaks_default = 10) {
   function(limits, p = p_default, n.breaks = n.breaks_default) {
     limits_trans <- scales::modulus_trans(p)$transform(limits)
