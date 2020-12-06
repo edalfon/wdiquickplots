@@ -128,7 +128,7 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, p)
 #' }
 plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
-                                     year, p = 0) {
+                                     year, p = 1) {
 
   # wdi_data <- wdi_data %>%
   #   group_by({{facets}}) %>%
@@ -221,7 +221,7 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               country = "all",
                               regions = wdiquickplots::regions,
                               income_groups = wdiquickplots::income_groups,
-                              p = 0) {
+                              p = 1) {
   plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
@@ -317,7 +317,7 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
                               country = "all",
                               regions = wdiquickplots::regions,
                               income_groups = wdiquickplots::income_groups,
-                              p = 0) {
+                              p = 1) {
 
   region <- year <- plot_ind <- highlight <- NULL
 
@@ -568,18 +568,48 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
 
 
 
-modulus_breaks <- function(p_default, n.breaks_default = 10) {
-  function(limits, p = p_default, n.breaks = n.breaks_default) {
+#' Modulus breaks factory
+#'
+#' This function tries to replicate/approximate the nice functionality of
+#' log-transformation (`scales` package to be used for `ggplot2` plots, using
+#' for example ggplot2::scale_x_log10()). that automatically shows breaks values
+#' in the original scale, even though the axis is on a transformed scale.
+#' Unfortunately, that is not the default behaviour of other transformations,
+#' and the modulus transformation in particular.
+#'
+#' This function does not aim for a clever algorithm. Rather it just calculates
+#' optimal breaks (labeling::extended) on the original and transformed scales,
+#' and combine them, expressing all in the original scale
+#'
+#' Take a look at scales::log_breaks and ?scales::log_trans
+#'
+#' @param p_custom p transformation exponent, as in scales::modulus_trans
+#' @param n.breaks_default number of breaks
+#'
+#' @return numeric vector with the breaks
+modulus_breaks <- function(p_custom, n.breaks_default = 10) {
+
+  function(limits, p = p_custom, n.breaks = n.breaks_default) {
+    # you get the limits in the original scale, so let's transform them to
+    # calculate the breaks on the transformed scale
     limits_trans <- scales::modulus_trans(p)$transform(limits)
-    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
     breaks_trans <- labeling::extended(
       dmin = min(limits_trans),
       dmax = max(limits_trans),
       m = n.breaks,
       Q = scales::modulus_trans(p)$transform(c(1, 5, 2, 2.5, 4, 3))
     )
-    breaks_final <- scales::modulus_trans(p)$inverse(breaks_trans)
-    c(breaks_final, breaks_notrans)
+    # But apply the inverse to express the breaks on the original scale
+    breaks_trans <- scales::modulus_trans(p)$inverse(breaks_trans)
+    # And also calculate breaks on the original scale
+    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
+    breaks_combined <- sort(c(breaks_trans, breaks_notrans))
+    # breaks calculated on the original  scale are already pretty, but the
+    # breaks calculated on the transformed scale are not (more precisely, they
+    # are only pretty on the transformed scale, but we want them in the end on
+    # the original scale)
+    breaks_final <- purrr::map_dbl(breaks_combined, ~ dplyr::first(pretty(.x, n = 1)))
+    breaks_final
   }
 }
 
