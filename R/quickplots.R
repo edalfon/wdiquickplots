@@ -150,7 +150,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
           {{ country }}, "\n",
           # tailor the scale function using all the data in {ind} but apply it
           # only to highlight data
-          tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+          get_formatter(pull(wdi_data, {{ ind }}))({{ highlight }})
         )
       ),
       # direction = "y", # only let ggrepel to adjust horizontally
@@ -167,7 +167,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
     #   aes(
     #     x = {{ highlight }},
     #     y = 0,
-    #     label = tailor_scales(pull(wdi_data, {{ ind }}))({{ highlight }})
+    #     label = get_formatter(pull(wdi_data, {{ ind }}))({{ highlight }})
     #   ),
     #   vjust = -0.1,
     #   hjust = 0,
@@ -181,7 +181,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
         # TODO: find better way to signal a few other years are there as well
       ),
       trans = scales::modulus_trans(p),
-      labels = tailor_scales(pull(wdi_data, {{ ind }})),
+      labels = get_formatter(pull(wdi_data, {{ ind }})),
       breaks = modulus_breaks(p),
       guide = guide_axis(check.overlap = TRUE),
       expand = c(0, 0)
@@ -227,7 +227,8 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
                              country, regions, income_groups)
 
-  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, year, p)
+  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight,
+                           year, p)
 }
 
 #' Plot a WDI indicator as an interactive bar-plot (powered by plotly)
@@ -247,16 +248,15 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              end = lubridate::year(Sys.Date()),
                              country = "all",
                              regions = wdiquickplots::regions,
-                             income_groups = wdiquickplots::income_groups) {
+                             income_groups = wdiquickplots::income_groups,
+                             base_color = "skyblue",
+                             highlight_color = "red") {
+
   # TODO: refactor plot
-  # TODO: fix colors using a lighter blue,
-  # TODO: let the user customize color
-  # TODO: let use transformed scales
+  # TODO: let customize transformed scales (currently using plotly's auto mode)
   # TODO: apply transformation. Perhaps use a button or dropdown to let the
   #       user customize the transformation parameter p interactively
   #       https://plotly.com/r/dropdowns/
-  # TODO: let filter regions and income groups
-  # TODO: let customize colors
   # TODO: let the user decide whether horizontal or vertical bar plot
   # https://plotly.com/r/reference/
 
@@ -269,7 +269,8 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     mutate(text = dplyr::case_when(
       !is.na(highlight) ~ paste0(country, " [", scales::comma(highlight), "]")
     )) %>%
-    mutate(color = dplyr::case_when(!is.na(highlight) ~ "red", TRUE ~ "lightblue"))
+    mutate(color = dplyr::case_when(!is.na(highlight) ~ highlight_color,
+                                    TRUE ~ base_color))
 
   plotly::plot_ly(
     data = wdi_data,
@@ -335,7 +336,7 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
     ) +
     scale_y_continuous(
       trans = scales::modulus_trans(p),
-      labels = tailor_scales(pull(wdi_data, plot_ind)),
+      labels = get_formatter(wdi_data$plot_ind),
       breaks = modulus_breaks(p),
       guide = guide_axis(check.overlap = TRUE),
       expand = c(0, 0)
@@ -369,12 +370,15 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
   # TODO: here you could actually download only the highlight countries
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
+
+  custom_formatter <- get_formatter(wdi_data$plot_ind)
+
   wdi_data <- wdi_data %>%
     filter(!is.na(highlight)) %>%
     group_by(country) %>%
     mutate(direct_labels = case_when(
-      year == max(year, na.rm = TRUE) ~ paste0(country, "\n", plot_ind),
-      year == min(year, na.rm = TRUE) ~ as.character(plot_ind)
+      year == max(year, na.rm = TRUE) ~ paste0(country, "\n", custom_formatter(plot_ind)),
+      year == min(year, na.rm = TRUE) ~ custom_formatter(plot_ind)
     )) %>%
     dplyr::arrange(country, year) # I hate that plotly makes you arrange it
 
@@ -464,7 +468,8 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
                                    end = lubridate::year(Sys.Date()),
                                    country = "all",
                               regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups) {
+                              income_groups = wdiquickplots::income_groups,
+                              p = 1) {
 
   # TODO: allow transformation passing p as in otherss
 
@@ -473,6 +478,8 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
+
+  custom_formatter <- get_formatter(wdi_data$plot_ind)
 
   wdi_race_data <- wdi_data %>%
     # most probably, there will be missing values in some countries for some years
@@ -493,7 +500,8 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
     # leave unhighlighted countries as NA, then the fill color will be grey
     mutate(highlight_country = case_when(!is.na(highlight) ~ country)) %>%
     mutate(highlight_country_label = case_when(
-      !is.na(highlight) ~ paste0(country_label, " (", highlight, ")"), TRUE ~ ""
+      !is.na(highlight) ~ paste0(country_label, " (", custom_formatter(highlight), ")"),
+      TRUE ~ ""
     )) %>%
     mutate(highlight_dummy = case_when(!is.na(highlight) ~ 1, TRUE ~ 0.77)) %>%
     # Now calculate country rank in every year, for the animated plot
@@ -530,7 +538,9 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
     scale_y_discrete("", expand = c(0, 0)) +
     scale_x_continuous(
       name = attr(wdi_data$plot_ind, "label"),
-      n.breaks = 10,
+      trans = scales::modulus_trans(p),
+      labels = custom_formatter,
+      breaks = modulus_breaks(p),
       guide = guide_axis(check.overlap = TRUE)
     ) +
     ggthemes::theme_tufte() +
@@ -573,7 +583,7 @@ modulus_breaks <- function(p_default, n.breaks_default = 10) {
   }
 }
 
-tailor_scales <- function(plot_data) {
+get_formatter <- function(plot_data) {
   if (all(plot_data >= 0 & plot_data <= 1)) {
     return(scales::percent_format(accuracy = 1))
   }
