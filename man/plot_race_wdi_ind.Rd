@@ -9,7 +9,9 @@ plot_race_wdi_ind(
   highlight_countries = c("Colombia", "Germany"),
   start = lubridate::year(Sys.Date()) - 10,
   end = lubridate::year(Sys.Date()),
-  country = "all"
+  country = "all",
+  regions = wdiquickplots::regions,
+  income_groups = wdiquickplots::income_groups
 )
 }
 \arguments{
@@ -21,7 +23,14 @@ plot_race_wdi_ind(
 
 \item{end}{last year to download data}
 
-\item{country}{subset of countries to download data. Default to "all"}
+\item{country}{subset of countries to download data from. Default to "all".
+This argument is passed as is to WDI::WDI and hence, requires
+'ISO-2 character codes, e.g. "BR", "US", "CA"'.}
+
+\item{regions}{character vector to filter the data only to specific regions}
+
+\item{income_groups}{character vector to filter the data only to specific
+sincome groups}
 }
 \value{
 gganimate

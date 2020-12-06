@@ -1,10 +1,33 @@
+regions <- c(
+  "Middle East & North Africa",
+  "Europe & Central Asia",
+  "Sub-Saharan Africa",
+  "Latin America & Caribbean",
+  "East Asia & Pacific",
+  "South Asia",
+  "North America"
+)
+
+income_groups <- c(
+  "Aggregates",
+  "High income",
+  "Upper middle income",
+  "Lower middle income",
+  "Low income"
+)
+
 #' Wrapper around WDI::WDI() to download data for a single indicator
 #'
 #' @param indicator character of length 1 with the indicator code
 #' @param highlight_countries character vector with country names to highlight
 #' @param start first year to download data
 #' @param end last year to download data
-#' @param country subset of countries to download data. Default to "all"
+#' @param country subset of countries to download data from. Default to "all".
+#'                This argument is passed as is to WDI::WDI and hence, requires
+#'                'ISO-2 character codes, e.g. "BR", "US", "CA"'.
+#' @param regions character vector to filter the data only to specific regions
+#' @param income_groups character vector to filter the data only to specific
+#'                      sincome groups
 #'
 #' @return data.frame with columns country, year, plot_ind, region, income,
 #'         highlight. highlight = NA, except for highlight countries in which
@@ -19,12 +42,17 @@
 #' }
 #'
 download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
-                           highlight_countries = c(""),
-                           start = lubridate::year(Sys.Date()) - 10,
-                           end = lubridate::year(Sys.Date()),
-                           country = "all") {
+                             highlight_countries = c(""),
+                             start = lubridate::year(Sys.Date()) - 10,
+                             end = lubridate::year(Sys.Date()),
+                             country = "all",
+                             regions = wdiquickplots::regions,
+                             income_groups = wdiquickplots::income_groups) {
 
   year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
+
+  regions <- match.arg(regions, several.ok = TRUE)
+  income_groups <- match.arg(income_groups, several.ok = TRUE)
 
   wdi_data <- WDI::WDI(
     country = country,
@@ -42,7 +70,9 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     mutate(income = factor(income, levels = c(
       "Aggregates", "High income", "Upper middle income", "Lower middle income",
       "Low income", NA
-    )))
+    ))) %>%
+    filter(region %in% regions) %>%
+    filter(income %in% income_groups)
 }
 
 #' Get latest data for a single indicator per country
@@ -65,11 +95,14 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                            highlight_countries = c(""),
                            start = lubridate::year(Sys.Date()) - 10,
                            end = lubridate::year(Sys.Date()),
-                           country = "all") {
+                           country = "all",
+                           regions = wdiquickplots::regions,
+                           income_groups = wdiquickplots::income_groups) {
 
   year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+                               country, regions, income_groups)
 
   wdi_data %>%
     group_by(country) %>%
@@ -94,7 +127,8 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
 #' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, p)
 #' }
-plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight, year, p = 0) {
+plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
+                                     year, p = 0) {
 
   # wdi_data <- wdi_data %>%
   #   group_by({{facets}}) %>%
@@ -185,10 +219,13 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
+                              regions = wdiquickplots::regions,
+                              income_groups = wdiquickplots::income_groups,
                               p = 0) {
   plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
+                             country, regions, income_groups)
 
   plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, year, p)
 }
@@ -205,27 +242,34 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' plot_bar_wdi_ind()
 #' }
 plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
-                              highlight_countries = c("Colombia", "Germany"),
-                              start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
-                              country = "all") {
+                             highlight_countries = c("Colombia", "Germany"),
+                             start = lubridate::year(Sys.Date()) - 10,
+                             end = lubridate::year(Sys.Date()),
+                             country = "all",
+                             regions = wdiquickplots::regions,
+                             income_groups = wdiquickplots::income_groups) {
   # TODO: refactor plot
+  # TODO: fix colors using a lighter blue,
+  # TODO: let the user customize color
+  # TODO: let use transformed scales
   # TODO: apply transformation. Perhaps use a button or dropdown to let the
   #       user customize the transformation parameter p interactively
   #       https://plotly.com/r/dropdowns/
   # TODO: let filter regions and income groups
   # TODO: let customize colors
   # TODO: let the user decide whether horizontal or vertical bar plot
+  # https://plotly.com/r/reference/
 
   plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
+                             country, regions, income_groups)
 
   wdi_data <- wdi_data %>%
     mutate(text = dplyr::case_when(
       !is.na(highlight) ~ paste0(country, " [", scales::comma(highlight), "]")
     )) %>%
-    mutate(color = dplyr::case_when(!is.na(highlight) ~ "red", TRUE ~ "blue"))
+    mutate(color = dplyr::case_when(!is.na(highlight) ~ "red", TRUE ~ "lightblue"))
 
   plotly::plot_ly(
     data = wdi_data,
@@ -241,12 +285,12 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     marker = list(color = ~color)
   ) %>%
     plotly::layout(
-      # using textfont above would not let you override limit
+      # using textfont above would not let you override text size limit
       # https://stackoverflow.com/questions/62094773/is-it-possible-to-override
       # -font-size-limit-on-labels-in-r-plotly-bar-charts
-      uniformtext=list(minsize=14, mode='show'),
+      uniformtext = list(minsize  =14, mode = "show"),
       xaxis = list(title = attr(wdi_data %>% pull(plot_ind), "label")),
-      yaxis = list(title = NA)
+      yaxis = list(title = NA, tickfont = list(size = 7))
     )
 }
 
@@ -270,11 +314,14 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
+                              regions = wdiquickplots::regions,
+                              income_groups = wdiquickplots::income_groups,
                               p = 0) {
 
   region <- year <- plot_ind <- highlight <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+                               country, regions, income_groups)
 
   ggplot(aes(x = year, y = plot_ind, color = country), data = wdi_data) +
     geom_point() +
@@ -311,14 +358,17 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
-                              country = "all") {
+                              country = "all",
+                              regions = wdiquickplots::regions,
+                              income_groups = wdiquickplots::income_groups) {
 
   # TODO: allow transformation passing p as in otherss
 
   year <- plot_ind <- highlight <- NULL
 
   # TODO: here you could actually download only the highlight countries
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+                               country, regions, income_groups)
   wdi_data <- wdi_data %>%
     filter(!is.na(highlight)) %>%
     group_by(country) %>%
@@ -363,13 +413,16 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
-                              country = "all") {
+                              country = "all",
+                              regions = wdiquickplots::regions,
+                              income_groups = wdiquickplots::income_groups) {
 
   # TODO: allow transformation passing p as in otherss
 
   year <- plot_ind <- highlight <- region <- income <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+                               country, regions, income_groups)
 
   wdi_data_wide <- wdi_data %>%
     select(-region, -income, -highlight) %>%
@@ -409,14 +462,17 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
                                    highlight_countries = c("Colombia", "Germany"),
                                    start = lubridate::year(Sys.Date()) - 10,
                                    end = lubridate::year(Sys.Date()),
-                                   country = "all") {
+                                   country = "all",
+                              regions = wdiquickplots::regions,
+                              income_groups = wdiquickplots::income_groups) {
 
   # TODO: allow transformation passing p as in otherss
 
   year <- plot_ind <- highlight <- region <- income <- highlight_country <-
     highlight_country_label <- highlight_dummy <- plot_ind_fill <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end, country)
+  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+                               country, regions, income_groups)
 
   wdi_race_data <- wdi_data %>%
     # most probably, there will be missing values in some countries for some years
@@ -523,3 +579,4 @@ tailor_scales <- function(plot_data) {
   }
   return(scales::comma_format(accuracy = 1))
 }
+
