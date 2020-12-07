@@ -11,7 +11,7 @@ plot_dist_wdi_ind_ggpdef(
   country,
   highlight,
   year,
-  p = 0
+  p = 1
 )
 }
 \arguments{

@@ -11,7 +11,9 @@ plot_bar_wdi_ind(
   end = lubridate::year(Sys.Date()),
   country = "all",
   regions = wdiquickplots::regions,
-  income_groups = wdiquickplots::income_groups
+  income_groups = wdiquickplots::income_groups,
+  base_color = "skyblue",
+  highlight_color = "red"
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ This argument is passed as is to WDI::WDI and hence, requires
 
 \item{income_groups}{character vector to filter the data only to specific
 sincome groups}
+
+\item{base_color}{fill color for the bars for most countries}
+
+\item{highlight_color}{fill color for the bars for highlighted countries}
 }
 \value{
 a plotly object

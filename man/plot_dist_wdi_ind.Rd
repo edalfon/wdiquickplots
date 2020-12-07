@@ -15,7 +15,7 @@ plot_dist_wdi_ind(
   country = "all",
   regions = wdiquickplots::regions,
   income_groups = wdiquickplots::income_groups,
-  p = 0
+  p = 1
 )
 }
 \arguments{

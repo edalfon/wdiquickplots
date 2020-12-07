@@ -7,46 +7,110 @@
 
 <!-- badges: end -->
 
-The goal of wdiquickplots is to …
+The goal of `wdiquickplots` is to provide, well, quick plots for World
+Development Indicators (WDI, [“the primary World Bank collection of
+development indicators, compiled from officially recognized
+international sources.”](https://databank.worldbank.org/home.aspx)). To
+get WDI data, this package is powered by
+[`WDI`](http://vincentarelbundock.github.io/WDI/) package, developed by
+Vincent Arel-Bundock.
 
 ## Installation
 
-You can install the released version of wdiquickplots from
-[CRAN](https://CRAN.R-project.org) with:
+You can install it from this Github repo with:
 
 ``` r
-install.packages("wdiquickplots")
+remotes::install_github("edalfon/wdiquickplots")
 ```
 
-## Example
+## Examples
 
-This is a basic example which shows you how to solve a common problem:
+Use case: hey I have to present this study I have been working on in my
+home country to an audience where I currently live (studying abroad or
+whatever). Thus, some background data on my home country is in order. A
+table would certainly do, but it is boring. So let’s put some plots in
+there.
 
 ``` r
 library(wdiquickplots)
-## basic example code
+plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+<img src="man/figures/README-dist-1.svg" width="40%" style="display: block; margin: auto;" />
+
+There you go. That’s the spirit of this package. One line of code and
+bang\!, a relatively decent plot that you can put in your slides to
+convey a quick message.
+
+Below you can see other examples, but in general, this package goes as
+follows:
+
+  - Find the code of the indicator of interest. You can use
+    `WDI::WDIsearch` for this, but I actually find it a bit more
+    user-friendly to simply go to the [indicators page
+    (https://data.worldbank.org/indicator)](https://data.worldbank.org/indicator)
+    and get the code from there (it’s in the URL).
+  - You pass the indicator code as the first argument of the different
+    plotting functions in this package.
+  - As second argument, you pass the countries you want to highlight.
+
+And there you go. Below you can see other examples, but in general, the
+plots in this package quickly show:
+
+  - Where the highlighted countries stand in therms of the indicator of
+    interest.
+  - How do they compare among highlighted countries, and agains the rest
+    of the world, regions or income groups.
+  - What have been the changes in time.
+
+You can read other details and description of features in the pkgdown
+site for this little package (I know, a pkgdown site may be overkill,
+but anyway).
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date.
+<!--html_preserve-->
 
-You can also embed plots, for example:
+<iframe src="C:\E\MEGA\R\wdiquickplots\man\figures\README-barplot.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0">
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+</iframe>
 
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub\!
+<!--/html_preserve-->
+
+``` r
+wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+<img src="man/figures/README-race-1.gif" width="40%" style="display: block; margin: auto;" />
+
+``` r
+wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+<!--html_preserve-->
+
+<iframe src="C:\E\MEGA\R\wdiquickplots\man\figures\README-lineplot.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0">
+
+</iframe>
+
+<!--/html_preserve-->
+
+``` r
+wdiquickplots::plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+<img src="man/figures/README-time_facets-1.png" width="70%" style="display: block; margin: auto;" />
+
+``` r
+wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+<!--html_preserve-->
+
+<iframe src="C:\E\MEGA\R\wdiquickplots\man\figures\README-spaghetti.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0">
+
+</iframe>
+
+<!--/html_preserve-->

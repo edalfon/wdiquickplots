@@ -9,8 +9,14 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  fig.align = "center",
+  fig.retina = 2,
+  out.width = "70%",
+  #dev = "svg",
+  message = FALSE,
+  warning = FALSE
 )
+devtools::load_all()
 ```
 
 # wdiquickplots
@@ -18,37 +24,134 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of wdiquickplots is to ...
+The goal of `wdiquickplots` is to provide, well, quick plots for World
+Development Indicators (WDI, ["the primary World Bank collection of
+development indicators, compiled from officially recognized international
+sources."](https://databank.worldbank.org/home.aspx)).  To get WDI data, this
+package is powered by [`WDI`](http://vincentarelbundock.github.io/WDI/) package,
+developed by Vincent Arel-Bundock.
 
 ## Installation
 
-You can install the released version of wdiquickplots from [CRAN](https://CRAN.R-project.org) with:
+You can install it from this Github repo with:
 
-``` r
-install.packages("wdiquickplots")
+```r
+remotes::install_github("edalfon/wdiquickplots")
 ```
 
-## Example
+## Examples
 
-This is a basic example which shows you how to solve a common problem:
+Use case: hey I have to present this study I have been working on in my home
+country to an audience where I currently live (studying abroad or whatever).
+Thus, some background data on my home country is in order. A table would
+certainly do, but it is boring. So let's put some plots in there.
 
-```{r example}
+```{r dist, fig.asp=870/550, fig.width=5, out.width="40%", dev="svg"}
 library(wdiquickplots)
-## basic example code
+plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+There you go. That's the spirit of this package. One line of code and bang!, 
+a relatively decent plot that you can put in your slides to convey a quick 
+message.
 
-```{r cars}
-summary(cars)
+Below you can see other examples, but in general, this package goes as follows:
+
+- Find the code of the indicator of interest. You can use `WDI::WDIsearch` for
+  this, but I actually find it a bit more user-friendly to simply go to the
+  [indicators page
+  (https://data.worldbank.org/indicator)](https://data.worldbank.org/indicator)
+  and get the code from there (it's in the URL).
+- You pass the indicator code as the first argument of the different plotting 
+  functions in this package.
+- As second argument, you pass the countries you want to highlight.
+
+And there you go. Below you can see other examples, but in general, the plots
+in this package quickly show:
+
+- Where the highlighted countries stand in therms of the indicator of interest.
+- How do they compare among highlighted countries, and agains the rest of the 
+  world, regions or income groups.
+- What have been the changes in time.
+
+You can read other details and description of features in the pkgdown site for 
+this little package (I know, a pkgdown site may be overkill, but anyway).
+
+```{r eval=FALSE}
+wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date.
+```{r barplot, echo=FALSE}
+# A workaround to include htmlwidgets in github_document output format
+# https://stackoverflow.com/questions/61253015/render-ggplotly-in-r-markdown-github-document
+plot_html_file <- normalizePath("man\\figures\\README-barplot.html")
+plot_html_widget <- wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
+htmlwidgets::saveWidget(plot_html_widget, plot_html_file, selfcontained = TRUE)
+# selfcontained = TRUE, but still the dependencies are copied to te figures dir
+# so you need to exclude them via .gitignore to avoid commiting jquery, plotly, 
+# and all other libraries in version control
 
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
+htmltools::tags$iframe(
+  src=plot_html_file,
+  width="70%",
+  height="600",
+  scrolling="no",
+  seamless="seamless",
+  frameBorder="0"
+)
+# TODO: center the iframe
+# TODO: consider also not including assets in the html file but rather cdn links
+# see for example this SO question for ideas
+# https://stackoverflow.com/questions/51213463/how-to-skip-writing-dependencies-in-htmlwidgetssavewidget
+# plot_html_widget$dependencies[[2]]$src$file <- NULL
+# plot_html_widget$dependencies[[2]]$src$href <- "https://code.jquery.com/"s
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub!
+```{r race, out.width="40%", fig.asp=550/350, fig.width=5}
+wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+
+```{r eval=FALSE}
+wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+```{r lineplot, echo=FALSE}
+plot_html_file <- normalizePath("man\\figures\\README-lineplot.html")
+plot_html_widget <- wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+htmlwidgets::saveWidget(plot_html_widget, plot_html_file)
+
+htmltools::tags$iframe(
+  src=plot_html_file,
+  width="70%",
+  height="600",
+  scrolling="no",
+  seamless="seamless",
+  frameBorder="0"
+)
+```
+
+
+```{r time_facets}
+wdiquickplots::plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+```{r eval=FALSE}
+wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+```{r spaghetti, echo=FALSE}
+plot_html_file <- normalizePath("man\\figures\\README-spaghetti.html")
+plot_html_widget <- wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
+htmlwidgets::saveWidget(plot_html_widget, plot_html_file)
+
+htmltools::tags$iframe(
+  src=plot_html_file,
+  width="70%",
+  height="600",
+  scrolling="no",
+  seamless="seamless",
+  frameBorder="0"
+)
+```
+

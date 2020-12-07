@@ -234,6 +234,8 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' Plot a WDI indicator as an interactive bar-plot (powered by plotly)
 #'
 #' @inheritParams download_wdi_ind
+#' @param base_color fill color for the bars for most countries
+#' @param highlight_color fill color for the bars for highlighted countries
 #'
 #' @return a plotly object
 #' @export
@@ -290,7 +292,10 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
       # https://stackoverflow.com/questions/62094773/is-it-possible-to-override
       # -font-size-limit-on-labels-in-r-plotly-bar-charts
       uniformtext = list(minsize  =14, mode = "show"),
-      xaxis = list(title = attr(wdi_data %>% pull(plot_ind), "label")),
+      xaxis = list(title = paste0(
+        attr(wdi_data$plot_ind, "label"), "\nYear ",
+        wdi_data$year %>% vctrs::vec_slice(i = 1), " *"
+      )),
       yaxis = list(title = NA, tickfont = list(size = 7))
     )
 }
@@ -335,15 +340,19 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
       label_params = list(fill = "white", point.padding = 0.1, direction = "y")
     ) +
     scale_y_continuous(
+      name = attr(wdi_data$plot_ind, "label"),
       trans = scales::modulus_trans(p),
       labels = get_formatter(wdi_data$plot_ind),
       breaks = modulus_breaks(p),
       guide = guide_axis(check.overlap = TRUE),
       expand = c(0, 0)
     ) +
+    scale_x_continuous(labels = scales::label_number(1, big.mark = "")) +
     scale_color_brewer(palette = "Set1") +
+    xlab("Year") +
     ggthemes::theme_tufte() +
-    theme(panel.border = element_rect(colour = "grey", fill = NA))
+    theme(panel.border = element_rect(colour = "grey", fill = NA)) +
+    labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
 }
 
 #' Line plot (plotly-powered) the indicator over time (year) for the
@@ -457,6 +466,7 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
 #' Race bar plot
 #'
 #' @inheritParams download_wdi_ind
+#' @param p transformation exponent, as in scales::modulus_trans
 #'
 #' @return gganimate
 #' @export
@@ -549,21 +559,24 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
     facet_null() +
     aes(group = country) +
     labs(title = 'Year: {frame_time}') +
+    labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), "")) +
     gganimate::transition_time(year) +
     #labs(title = 'Year: {closest_state}', y = "") +
     #gganimate::transition_states(states = year, transition_length = 1, state_length = 1) +
     gganimate::ease_aes('cubic-in-out')
 
-  gganimate::animate(
-    anim,
-    nframes = 250,
-    fps = 25,
-    start_pause = 25,
-    end_pause = 25,
-    width = 350,
-    height = 550,
-    renderer = gganimate::gifski_renderer()
-  )
+  anim
+  # set custom animation parameters and render the animation
+  # gganimate::animate(
+  #   anim,
+  #   nframes = 250,
+  #   fps = 25,
+  #   start_pause = 25,
+  #   end_pause = 25,
+  #   width = 350,
+  #   height = 550,
+  #   renderer = gganimate::gifski_renderer()
+  # )
 }
 
 

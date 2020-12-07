@@ -11,6 +11,6 @@
 #'                     guide_axis labs scale_color_brewer scale_fill_brewer
 #'                     scale_x_continuous scale_y_continuous theme vars ylab
 #'                     element_blank facet_null geom_rect geom_text
-#'                     scale_y_discrete
+#'                     scale_y_discrete scale_x_discrete xlab ylab
 ## usethis namespace: end
 NULL

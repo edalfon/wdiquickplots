@@ -11,7 +11,8 @@ plot_race_wdi_ind(
   end = lubridate::year(Sys.Date()),
   country = "all",
   regions = wdiquickplots::regions,
-  income_groups = wdiquickplots::income_groups
+  income_groups = wdiquickplots::income_groups,
+  p = 1
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ This argument is passed as is to WDI::WDI and hence, requires
 
 \item{income_groups}{character vector to filter the data only to specific
 sincome groups}
+
+\item{p}{transformation exponent, as in scales::modulus_trans}
 }
 \value{
 gganimate

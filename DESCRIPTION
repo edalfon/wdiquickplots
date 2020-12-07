@@ -26,7 +26,8 @@ Imports:
     gghighlight,
     dygraphs,
     gganimate,
-    zoo
+    zoo,
+    purrr
 Suggests: 
     testthat,
     spelling
