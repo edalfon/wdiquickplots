@@ -2,8 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=r
 # https://gitignore.io/
 
-man/figures/*.css
-man/figures/*.js
+# Ignore dependencies files default of htmlwidgets::saveWidget to filename_files)
+man/figures/*_files
 
 
 ### R ###
