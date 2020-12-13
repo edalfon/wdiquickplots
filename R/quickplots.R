@@ -46,8 +46,8 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              start = lubridate::year(Sys.Date()) - 10,
                              end = lubridate::year(Sys.Date()),
                              country = "all",
-                             regions = wdiquickplots::regions,
-                             income_groups = wdiquickplots::income_groups) {
+                             regions = wdiquickplots:::regions,
+                             income_groups = wdiquickplots:::income_groups) {
 
   year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
 
@@ -96,8 +96,8 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                            start = lubridate::year(Sys.Date()) - 10,
                            end = lubridate::year(Sys.Date()),
                            country = "all",
-                           regions = wdiquickplots::regions,
-                           income_groups = wdiquickplots::income_groups) {
+                           regions = wdiquickplots:::regions,
+                           income_groups = wdiquickplots:::income_groups) {
 
   year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
 
@@ -135,7 +135,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
   #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
   #   ungroup()
 
-  ggplot(aes(x = {{ ind }}, fill = {{ facets }}), data = wdi_data) +
+  the_plot <- ggplot(aes(x = {{ ind }}, fill = {{ facets }}), data = wdi_data) +
     facet_wrap(vars({{ facets }}), ncol = 1, scales = "free_y") +
     geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
     geom_rug() +
@@ -144,7 +144,8 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
       aes(
         x = {{ highlight }},
         y = Inf,
-        # using this, two highlights in a facet would never be in the line center
+        # using custom_hjust, two highlights in a facet would never be in
+        # the line center, so better let them just repel
         # hjust = custom_hjust,
         label = paste0(
           {{ country }}, "\n",
@@ -154,7 +155,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
         )
       ),
       # direction = "y", # only let ggrepel to adjust horizontally
-      point.padding = NA, # do not repel if there is only 1 highlight in a facet
+      point.padding = NA, # never repel if there is only 1 highlight in a facet
       vjust = 1,
       hjust = 0.5,
       lineheight = 0.75,
@@ -173,7 +174,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
     #   hjust = 0,
   #   fontface = "bold"
   # ) +
-  ggthemes::theme_tufte() +
+    ggthemes::theme_tufte() +
     scale_x_continuous(
       name = paste0(
         attr(wdi_data %>% pull({{ ind }}), "label"), "\nYear ",
@@ -186,16 +187,26 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
       guide = guide_axis(check.overlap = TRUE),
       expand = c(0, 0)
     ) +
-    scale_fill_brewer(
-      palette = ifelse(
-        test = "income" %in% names(select(wdi_data, {{ facets }})),
-        yes = "RdYlGn",
-        no = "Dark2"),
-      direction = -1
-    ) +
+    scale_fill_brewer(palette = "Dark2") +
+    # scale_fill_brewer(
+    #   palette = ifelse(
+    #     test = "income" %in% names(select(wdi_data, {{ facets }})),
+    #     yes = "Blues",
+    #     no = "Dark2"),
+    #   direction = -1
+    # ) +
     theme(legend.position = "none") +
     ylab("Density") +
     labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
+
+  if (any("income" %in% names(select(wdi_data, {{ facets }})))) {
+    the_plot <- the_plot +
+      ggplot2::scale_fill_discrete(
+        type = rev(RColorBrewer::brewer.pal(n = 7, name = 'Blues'))
+      )
+  }
+
+  the_plot
 }
 
 #' Plot the distribution (density) of a single indicator using WDI data,
@@ -219,8 +230,8 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups,
+                              regions = wdiquickplots:::regions,
+                              income_groups = wdiquickplots:::income_groups,
                               p = 1) {
   plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
 
@@ -249,8 +260,8 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              start = lubridate::year(Sys.Date()) - 10,
                              end = lubridate::year(Sys.Date()),
                              country = "all",
-                             regions = wdiquickplots::regions,
-                             income_groups = wdiquickplots::income_groups,
+                             regions = wdiquickplots:::regions,
+                             income_groups = wdiquickplots:::income_groups,
                              base_color = "skyblue",
                              highlight_color = "red") {
 
@@ -320,8 +331,8 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups,
+                              regions = wdiquickplots:::regions,
+                              income_groups = wdiquickplots:::income_groups,
                               p = 1) {
 
   region <- year <- plot_ind <- highlight <- NULL
@@ -369,8 +380,8 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups) {
+                              regions = wdiquickplots:::regions,
+                              income_groups = wdiquickplots:::income_groups) {
 
   # TODO: allow transformation passing p as in otherss
 
@@ -427,8 +438,8 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups) {
+                              regions = wdiquickplots:::regions,
+                              income_groups = wdiquickplots:::income_groups) {
 
   # TODO: allow transformation passing p as in otherss
 
@@ -447,18 +458,17 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
     xlab = "",
     ylab = attr(wdi_data$plot_ind, "label")
   ) %>%
-    dygraphs::dyLegend(width = 700) %>%
     dygraphs::dyOptions(drawPoints = TRUE, pointSize = 2) %>%
     dygraphs::dyHighlight(
       highlightCircleSize = 5,
       highlightSeriesBackgroundAlpha = 0.1,
-      highlightSeriesOpts =  list(strokeWidth = 5),
+      highlightSeriesOpts = list(strokeWidth = 5),
       hideOnMouseOut = TRUE
     ) %>%
     dygraphs::dyRangeSelector()
   # to show legend only for highlighted series. Sonst it is even more messy
-  dy_spaghetti$x$css <- ".dygraph-legend > span {display:none;}
-                         .dygraph-legend > span.highlight { display: inline; }"
+  dy_spaghetti$x$css <- ".dygraph-legend > span {display: none;}
+                         .dygraph-legend > span.highlight {display: inline-flex;}"
   dy_spaghetti
 }
 
@@ -473,12 +483,12 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
 #'
 #' @examples
 plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
-                                   highlight_countries = c("Colombia", "Germany"),
-                                   start = lubridate::year(Sys.Date()) - 10,
-                                   end = lubridate::year(Sys.Date()),
-                                   country = "all",
-                              regions = wdiquickplots::regions,
-                              income_groups = wdiquickplots::income_groups,
+                              highlight_countries = c("Colombia", "Germany"),
+                              start = lubridate::year(Sys.Date()) - 10,
+                              end = lubridate::year(Sys.Date()),
+                              country = "all",
+                              regions = wdiquickplots:::regions,
+                              income_groups = wdiquickplots:::income_groups,
                               p = 1) {
 
   # TODO: allow transformation passing p as in otherss
@@ -633,3 +643,4 @@ get_formatter <- function(plot_data) {
   return(scales::comma_format(accuracy = 1))
 }
 
+# TODO: bring the bubble plot

@@ -1,11 +1,10 @@
 Package: wdiquickplots
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Quick Plots for WDI data and other World Bank-hosted databases
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: Eduardo Alfonso-Sierra
+Maintainer: Eduardo Alfonso-Sierra <edalfon@gmail.com>
+Description: Plot indicators from WDI data with one line of code.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -27,8 +26,13 @@ Imports:
     dygraphs,
     gganimate,
     zoo,
-    purrr
+    purrr,
+    lubridate,
+    RColorBrewer
 Suggests: 
     testthat,
-    spelling
+    spelling,
+    knitr,
+    rmarkdown
 Language: en-US
+VignetteBuilder: knitr

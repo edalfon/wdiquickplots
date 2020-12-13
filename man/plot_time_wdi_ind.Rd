@@ -11,8 +11,8 @@ plot_time_wdi_ind(
   start = lubridate::year(Sys.Date()) - 10,
   end = lubridate::year(Sys.Date()),
   country = "all",
-  regions = wdiquickplots::regions,
-  income_groups = wdiquickplots::income_groups
+  regions = wdiquickplots:::regions,
+  income_groups = wdiquickplots:::income_groups
 )
 }
 \arguments{

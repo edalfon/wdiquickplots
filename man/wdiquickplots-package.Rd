@@ -4,9 +4,8 @@
 \name{wdiquickplots-package}
 \alias{wdiquickplots}
 \alias{wdiquickplots-package}
-\title{wdiquickplots: What the Package Does (Title Case)}
+\title{wdiquickplots: Quick Plots for WDI data and other World Bank-hosted databases}
 \description{
-More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Plot indicators from WDI data with one line of code.
 }
 \keyword{internal}
