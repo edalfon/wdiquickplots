@@ -54,7 +54,7 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
   regions <- match.arg(regions, several.ok = TRUE)
   income_groups <- match.arg(income_groups, several.ok = TRUE)
 
-  wdi_data <- WDI::WDI(
+  wdi_data <- memoised_wdi(
     country = country,
     indicator = c(plot_ind = indicator), # named vector will be renamed, thx WDI
     start = start,
@@ -74,6 +74,12 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     filter(region %in% regions) %>%
     filter(income %in% income_groups)
 }
+
+memoised_wdi <- memoise::memoise(
+  f = WDI::WDI,
+  cache = memoise::cache_filesystem("~/wdiquickplots_cache")
+)
+
 
 #' Get latest data for a single indicator per country
 #'

@@ -28,7 +28,8 @@ Imports:
     zoo,
     purrr,
     lubridate,
-    RColorBrewer
+    RColorBrewer,
+    memoise
 Suggests: 
     testthat,
     spelling,
