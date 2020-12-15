@@ -37,3 +37,5 @@ Suggests:
     rmarkdown
 Language: en-US
 VignetteBuilder: knitr
+URL: https://github.com/edalfon/wdiquickplots
+BugReports: https://github.com/edalfon/wdiquickplots/issues
