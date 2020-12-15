@@ -1,5 +1,7 @@
 ---
-output: github_document
+output: 
+  github_document:
+    html_preview: false
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -17,8 +19,65 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-devtools::load_all()
 ```
+
+```{r include=FALSE}
+# We need a workaround to include htmlwidgets in github_document output format.
+# This just generates the github-flavored markdown (.md) and then github
+# generates on-the-fly the html from it. Thus htmlwidgets wont's work
+# out-of-the-box.
+# This solution is based on 
+# https://stackoverflow.com/questions/61253015/render-ggplotly-in-r-markdown-github-document
+iframe_htmlwidget <- function(htmlwidget) {
+  
+  html_path <- knitr::fig_path("html") # get the path like knitr would do
+  # TODO: should I ensure this is always a relative path?
+  #       it seems it is, but can't seems to find assurances
+  
+  htmlwidgets::saveWidget(
+    widget = htmlwidget, 
+    file = normalizePath(html_path), # full path, otherwise it'll complain
+    selfcontained = TRUE
+    # selfcontained = TRUE, but still the dependencies are copied to te figures
+    # dir so you need to exclude them via .gitignore to avoid commiting jquery,
+    # plotly, and all other libraries in version control
+  )
+  
+  # If local preview, you want the iframe to point to an absolute path because
+  # "when you render from within RStudio using the Knit button the preview HTML 
+  # is written to a temporary directory and then automatically displayed by 
+  # RStudio.". 
+  # https://rmarkdown.rstudio.com/github_document_format.html#HTML_Preview
+  # 
+  # They handle the images well, but they are not aware of the 
+  # iframe, and therefore, the saved htmlwidget will not be found.
+  # To overcome this, and absolute path in your system will do. However, that
+  # won't work when it's online, so before pushing this to github, you should
+  # set html_preview = FALSE and this little function will leave the iframe
+  # with a relative path
+  iframe_src_path <- ifelse(
+    test = isTRUE(rmarkdown::metadata$output$github_document$html_preview),
+    yes = normalizePath(html_path),
+    no = html_path
+  )
+
+  htmltools::tags$iframe(
+    src = iframe_src_path,
+    width = "70%",
+    height = "600",
+    scrolling = "no",
+    seamless = "seamless",
+    frameBorder = "0",
+    style = "display: block; margin: auto;"
+  )
+  # TODO: consider also not including assets in the html file but rather cdn links
+  # see for example this SO question for ideas
+  # https://stackoverflow.com/questions/51213463/how-to-skip-writing-dependencies-in-htmlwidgetssavewidget
+  # plot_html_widget$dependencies[[2]]$src$file <- NULL
+  # plot_html_widget$dependencies[[2]]$src$href <- "https://code.jquery.com/"s
+}
+```
+
 
 # wdiquickplots
 
@@ -101,31 +160,7 @@ wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r barplot, echo=FALSE}
-# A workaround to include htmlwidgets in github_document output format
-# https://stackoverflow.com/questions/61253015/render-ggplotly-in-r-markdown-github-document
-print(getwd())
-plot_html_file <- ("man/figures/README-barplot.html")
-plot_html_widget <- wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
-htmlwidgets::saveWidget(plot_html_widget, normalizePath(plot_html_file), selfcontained = TRUE)
-# selfcontained = TRUE, but still the dependencies are copied to te figures dir
-# so you need to exclude them via .gitignore to avoid commiting jquery, plotly, 
-# and all other libraries in version control
-
-htmltools::tags$iframe(
-  src=plot_html_file,
-  width="70%",
-  height="600",
-  scrolling="no",
-  seamless="seamless",
-  frameBorder="0",
-  style="display: block; margin: auto;"
-)
-# TODO: center the iframe
-# TODO: consider also not including assets in the html file but rather cdn links
-# see for example this SO question for ideas
-# https://stackoverflow.com/questions/51213463/how-to-skip-writing-dependencies-in-htmlwidgetssavewidget
-# plot_html_widget$dependencies[[2]]$src$file <- NULL
-# plot_html_widget$dependencies[[2]]$src$href <- "https://code.jquery.com/"s
+iframe_htmlwidget(wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
 # Race bar plot
@@ -133,7 +168,7 @@ htmltools::tags$iframe(
 Takes the same approach as the bar plot above, but showing also how it changes 
 over time (powered by `gganimate`).
 
-```{r race, out.width="40%", fig.asp=550/350, fig.width=5}
+```{r race, out.width="40%", fig.asp=550/350, fig.width=5, cache=TRUE}
 wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
@@ -148,19 +183,7 @@ wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r lineplot, echo=FALSE}
-plot_html_file <- normalizePath("man\\figures\\README-lineplot.html")
-plot_html_widget <- wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
-htmlwidgets::saveWidget(plot_html_widget, plot_html_file)
-
-htmltools::tags$iframe(
-  src=plot_html_file,
-  width="70%",
-  height="600",
-  scrolling="no",
-  seamless="seamless",
-  frameBorder="0",
-  style="display: block; margin: auto;"
-)
+iframe_htmlwidget(wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
 # Facetted line plot
@@ -187,18 +210,6 @@ wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r spaghetti, echo=FALSE}
-plot_html_file <- normalizePath("man\\figures\\README-spaghetti.html")
-plot_html_widget <- wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
-htmlwidgets::saveWidget(plot_html_widget, plot_html_file)
-
-htmltools::tags$iframe(
-  src=plot_html_file,
-  width="95%",
-  height="600",
-  scrolling="no",
-  seamless="seamless",
-  frameBorder="0",
-  style="display: block; margin: auto;"
-)
+iframe_htmlwidget(wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
