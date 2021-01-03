@@ -29,7 +29,9 @@ Imports:
     purrr,
     lubridate,
     RColorBrewer,
-    memoise
+    memoise,
+    gifski,
+    png
 Suggests: 
     testthat,
     spelling,
