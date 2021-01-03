@@ -90,13 +90,7 @@ each country as tooltip).
 wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
-<!--html_preserve-->
-
-<iframe src="man/figures/README-barplot-1.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0" style="display: block; margin: auto;">
-
-</iframe>
-
-<!--/html_preserve-->
+<img src="man/figures/README-barplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Race bar plot
 
@@ -105,7 +99,6 @@ changes over time (powered by `gganimate`).
 
 ``` r
 wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
-#> WDI: 0 sec elapsed
 ```
 
 <img src="man/figures/README-race-1.gif" width="40%" style="display: block; margin: auto;" />
@@ -120,13 +113,7 @@ series directly (it is an interactive plot as well).
 wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
-<!--html_preserve-->
-
-<iframe src="man/figures/README-lineplot-1.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0" style="display: block; margin: auto;">
-
-</iframe>
-
-<!--/html_preserve-->
+<img src="man/figures/README-lineplot-1.png" width="70%" style="display: block; margin: auto;" />
 
 # Facetted line plot
 
@@ -153,10 +140,4 @@ eye-catching patterns.
 wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
-<!--html_preserve-->
-
-<iframe src="man/figures/README-spaghetti-1.html" width="70%" height="600" scrolling="no" seamless="seamless" frameBorder="0" style="display: block; margin: auto;">
-
-</iframe>
-
-<!--/html_preserve-->
+<img src="man/figures/README-spaghetti-1.png" width="70%" style="display: block; margin: auto;" />

@@ -1,7 +1,7 @@
 ---
 output: 
   github_document:
-    html_preview: false
+    html_preview: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -19,20 +19,27 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
+devtools::load_all()
 ```
 
 ```{r include=FALSE}
-# We need a workaround to include htmlwidgets in github_document output format.
+# a workaround to include htmlwidgets in github_document output format.
 # This just generates the github-flavored markdown (.md) and then github
 # generates on-the-fly the html from it. Thus htmlwidgets wont's work
-# out-of-the-box.
-# This solution is based on 
+# out-of-the-box. This solution is based on 
 # https://stackoverflow.com/questions/61253015/render-ggplotly-in-r-markdown-github-document
+# 
+# yet, it will not work in github. Locally it works fine, but up there in 
+# github, the github flavored markdown spec disallows some html tags, including
+# <iframe> and therefore it will just show the code and not actually render the
+# content of the iframe target
+# https://github.github.com/gfm/#disallowed-raw-html-extension-
+# Then, just webshot the htmlwidgets and make them a static image
 iframe_htmlwidget <- function(htmlwidget) {
   
   html_path <- knitr::fig_path("html") # get the path like knitr would do
   # TODO: should I ensure this is always a relative path?
-  #       it seems it is, but can't seems to find assurances
+  #       it seems it is, but can't find assurances
   
   htmlwidgets::saveWidget(
     widget = htmlwidget, 
@@ -75,6 +82,20 @@ iframe_htmlwidget <- function(htmlwidget) {
   # https://stackoverflow.com/questions/51213463/how-to-skip-writing-dependencies-in-htmlwidgetssavewidget
   # plot_html_widget$dependencies[[2]]$src$file <- NULL
   # plot_html_widget$dependencies[[2]]$src$href <- "https://code.jquery.com/"s
+}
+
+# I guess this is another viable approach
+# https://github.com/ropensci/plotly/issues/1620
+# Basically use output: html_document: keep_md: true
+
+# Need this little function to use webshot2
+# Although plain webshot would be more convenient as rmarkdown would handle 
+# it automatically, webshot does not get along good with plotly
+webshotme <- function(htmlwidget, ...) {
+  png_path <- knitr::fig_path("png") # get the path like knitr would do
+  html_path <- tempfile(fileext = ".html")
+  htmlwidgets::saveWidget(htmlwidget, file = html_path, selfcontained = TRUE)
+  webshot2::webshot(html_path, file = png_path, ...)
 }
 ```
 
@@ -160,7 +181,7 @@ wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r barplot, echo=FALSE}
-iframe_htmlwidget(wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD"))
+webshotme(wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
 # Race bar plot
@@ -168,9 +189,10 @@ iframe_htmlwidget(wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD"))
 Takes the same approach as the bar plot above, but showing also how it changes 
 over time (powered by `gganimate`).
 
-```{r race, out.width="40%", fig.asp=550/350, fig.width=5, cache=TRUE}
+```{r race, out.width="40%", fig.asp=550/350, fig.width=5, cache=FALSE}
 wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
+
 
 # Line plot
 
@@ -183,7 +205,7 @@ wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r lineplot, echo=FALSE}
-iframe_htmlwidget(wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD"))
+webshotme(wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
 # Facetted line plot
@@ -210,6 +232,6 @@ wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
 
 ```{r spaghetti, echo=FALSE}
-iframe_htmlwidget(wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD"))
+webshotme(wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD"))
 ```
 
