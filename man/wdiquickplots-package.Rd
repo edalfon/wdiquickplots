@@ -8,4 +8,12 @@
 \description{
 Plot indicators from WDI data with one line of code.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/edalfon/wdiquickplots}
+  \item Report bugs at \url{https://github.com/edalfon/wdiquickplots/issues}
+}
+
+}
 \keyword{internal}
