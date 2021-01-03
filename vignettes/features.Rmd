@@ -37,7 +37,7 @@ Some of the plots have facets and you can configure whether they group the data
 by geographical regions or income groups. Simply pass unquoted `region` or 
 `income` to the `facets` argument.
 
-```{r dist, fig.asp=870/550, fig.width=4.5, out.width="47%", dev="svg", fig.ext = "svg", fig.align = "default"}
+```{r dist, fig.asp=870/550, fig.width=6, out.width="47%", dev="svg", fig.ext = "svg", fig.align = "default"}
 plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = income, p = 0)
 plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = region, p = 0)
 ```
