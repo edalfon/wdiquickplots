@@ -23,7 +23,7 @@ You can install it from this Github repo with:
 remotes::install_github("edalfon/wdiquickplots")
 ```
 
-## Examples
+## How to use it
 
 Use case: hey I have to present this study I have been working on in my
 home country to an audience where I currently live (studying abroad or
@@ -53,91 +53,17 @@ Using this package goes as follows:
     plotting functions in this package.
   - As second argument, you pass the countries you want to highlight.
 
-And there you go. Below you can see examples, but in general, the plots
-in this package quickly show:
+And that’s it.
+
+You can read other details and description of features [in the `pkgdown`
+site for this little package](https://edalfon.github.io/wdiquickplots/)
+(I know, a `pkgdown` site may be overkill, but anyway). [There you can
+also see examples for all the quick plots in this
+package](https://edalfon.github.io/wdiquickplots/docs/articles/wdiquickplots.html),
+but in general, they quickly show:
 
   - Where the highlighted countries stand in terms of the indicator of
     interest.
   - How do they compare among highlighted countries, and against the
     rest of the world, regions or income groups.
   - What have been the changes in time.
-
-You can read other details and description of features in the `pkgdown`
-site for this little package (I know, a `pkgdown` site may be overkill,
-but anyway).
-
-# Distribution
-
-A plot to quickly compare highlighted countries, among them, and with
-the rest of the world using either regions or income, to group
-countries.
-
-``` r
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = income, p = 0)
-```
-
-<img src="man/figures/README-dist_gini-1.svg" width="47%" style="display: block; margin: auto;" />
-
-# Bar plot
-
-Similar as the distribution plot, quickly shows where the highlighted
-countries stand in comparison with the rest of the world (without using
-any country groups). This one is interactive so you can explore a bit
-(e.g. zooming in and out or see the exact value of the indicator for
-each country as tooltip).
-
-``` r
-wdiquickplots::plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
-```
-
-<img src="man/figures/README-barplot-1.png" width="70%" style="display: block; margin: auto;" />
-
-# Race bar plot
-
-Takes the same approach as the bar plot above, but showing also how it
-changes over time (powered by `gganimate`).
-
-``` r
-wdiquickplots::plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
-```
-
-<img src="man/figures/README-race-1.gif" width="40%" style="display: block; margin: auto;" />
-
-# Line plot
-
-Well, a line plot including only data from the highlighted countries. It
-shows directly the first and last value for each country and labels the
-series directly (it is an interactive plot as well).
-
-``` r
-wdiquickplots::plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
-```
-
-<img src="man/figures/README-lineplot-1.png" width="70%" style="display: block; margin: auto;" />
-
-# Facetted line plot
-
-Also a line plot as above, but including data for all countries. It is
-powered by `gghighlight` to disentangle the spaghetti plot.
-
-``` r
-wdiquickplots::plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
-```
-
-<img src="man/figures/README-time_facets-1.svg" width="70%" style="display: block; margin: auto;" />
-
-# Spaghetti plot
-
-No one should ever see or want to see a spaghetti plot with so many
-series. Yet, here’s one. 🙈.
-
-Just have fun playing with it. The interactivity (powered by `dygraphs`)
-highlights one series at a time, and sometimes (very rarely, but
-sometimes), can make such a spaghetti plot useful to identify
-eye-catching patterns.
-
-``` r
-wdiquickplots::plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
-```
-
-<img src="man/figures/README-spaghetti-1.png" width="70%" style="display: block; margin: auto;" />

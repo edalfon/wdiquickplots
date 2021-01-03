@@ -1,0 +1,95 @@
+---
+title: "Quickplots examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{wdiquickplots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.show = "hold",
+  fig.retina = 2,
+  out.width = "70%",
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+```{r setup}
+library(wdiquickplots)
+```
+
+
+# Distribution
+
+A plot to quickly compare highlighted countries, among them, and with the 
+rest of the world using either region or income, to group countries.
+
+```{r dist_gini, fig.asp=870/550, fig.width=4, out.width="47%", dev="svg", fig.ext="svg"}
+plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
+```
+
+
+# Bar plot
+
+Similar as the distribution plot, quickly shows where the highlighted countries
+stand in comparison with the rest of the world (without using any country
+groups). This one is interactive so you can explore a bit (e.g. zooming in and 
+out or see the exact value of the indicator for each country as tooltip).
+
+```{r barplot}
+plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+# Race bar plot
+
+Takes the same approach as the bar plot above, but showing also how it changes 
+over time (powered by `gganimate`).
+
+```{r race, out.width="40%", fig.asp=550/350, fig.width=5, cache=FALSE}
+plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+
+# Line plot
+
+Well, a line plot including only data from the highlighted countries. It shows 
+directly the first and last value for each country and labels the series 
+directly (it is an interactive plot as well).
+
+```{r lineplot}
+plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+
+# Facetted line plot
+
+Also a line plot as above, but including data for all countries.
+It is powered by `gghighlight` to disentangle the spaghetti plot.
+
+```{r time_facets, dev="svg", fig.ext="svg"}
+plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+# Spaghetti plot
+
+No one should ever see or want to see a spaghetti plot with so many series. 
+Yet, here's one. `r emo::ji("see_no_evil_monkey")`.
+
+Just have fun playing with it. The interactivity (powered by `dygraphs`)
+highlights one series at a time, and sometimes (very rarely, but sometimes), can 
+make such a spaghetti plot useful to identify eye-catching patterns.
+
+
+```{r spaghetti}
+plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
+```
+
+
+
+
