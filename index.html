@@ -44,6 +44,9 @@
   </a>
 </li>
 <li>
+  <a href="articles/wdiquickplots.html">Get started</a>
+</li>
+<li>
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
@@ -54,7 +57,7 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/features.html">features</a>
+      <a href="articles/features.html">Features</a>
     </li>
   </ul>
 </li>
@@ -78,7 +81,6 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
 <div id="wdiquickplots" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#wdiquickplots" class="anchor"></a>wdiquickplots</h1></div>
@@ -92,9 +94,9 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"edalfon/wdiquickplots"</span><span class="op">)</span></code></pre></div>
 </div>
-<div id="examples" class="section level2">
+<div id="how-to-use-it" class="section level2">
 <h2 class="hasAnchor">
-<a href="#examples" class="anchor"></a>Examples</h2>
+<a href="#how-to-use-it" class="anchor"></a>How to use it</h2>
 <p>Use case: hey I have to present this study I have been working on in my home country to an audience where I currently live (studying abroad or whatever). Thus, some background data on my home country is in order. A table would certainly do, but it is boring. So let’s put some plots in there.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/edalfon/wdiquickplots">wdiquickplots</a></span><span class="op">)</span>
@@ -107,65 +109,15 @@
 <li>You pass the indicator code as the first argument of the different plotting functions in this package.</li>
 <li>As second argument, you pass the countries you want to highlight.</li>
 </ul>
-<p>And there you go. Below you can see examples, but in general, the plots in this package quickly show:</p>
+<p>And that’s it.</p>
+<p>You can read other details and description of features <a href="https://edalfon.github.io/wdiquickplots/">in the <code>pkgdown</code> site for this little package</a> (I know, a <code>pkgdown</code> site may be overkill, but anyway). <a href="https://edalfon.github.io/wdiquickplots/docs/articles/wdiquickplots.html">There you can also see examples for all the quick plots in this package</a>, but in general, they quickly show:</p>
 <ul>
 <li>Where the highlighted countries stand in terms of the indicator of interest.</li>
 <li>How do they compare among highlighted countries, and against the rest of the world, regions or income groups.</li>
 <li>What have been the changes in time.</li>
 </ul>
-<p>You can read other details and description of features in the <code>pkgdown</code> site for this little package (I know, a <code>pkgdown</code> site may be overkill, but anyway).</p>
 </div>
 </div>
-<div id="distribution" class="section level1">
-<h1 class="hasAnchor">
-<a href="#distribution" class="anchor"></a>Distribution</h1>
-<p>A plot to quickly compare highlighted countries, among them, and with the rest of the world using either regions or income, to group countries.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="reference/plot_dist_wdi_ind.html">plot_dist_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span>, facets <span class="op">=</span> <span class="va">income</span>, p <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-dist_gini-1.svg" width="47%" style="display: block; margin: auto;"></p>
-</div>
-<div id="bar-plot" class="section level1">
-<h1 class="hasAnchor">
-<a href="#bar-plot" class="anchor"></a>Bar plot</h1>
-<p>Similar as the distribution plot, quickly shows where the highlighted countries stand in comparison with the rest of the world (without using any country groups). This one is interactive so you can explore a bit (e.g. zooming in and out or see the exact value of the indicator for each country as tooltip).</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">wdiquickplots</span><span class="fu">::</span><span class="fu"><a href="reference/plot_bar_wdi_ind.html">plot_bar_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-barplot-1.png" width="70%" style="display: block; margin: auto;"></p>
-</div>
-<div id="race-bar-plot" class="section level1">
-<h1 class="hasAnchor">
-<a href="#race-bar-plot" class="anchor"></a>Race bar plot</h1>
-<p>Takes the same approach as the bar plot above, but showing also how it changes over time (powered by <code>gganimate</code>).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">wdiquickplots</span><span class="fu">::</span><span class="fu"><a href="reference/plot_race_wdi_ind.html">plot_race_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-race-1.gif" width="40%" style="display: block; margin: auto;"></p>
-</div>
-<div id="line-plot" class="section level1">
-<h1 class="hasAnchor">
-<a href="#line-plot" class="anchor"></a>Line plot</h1>
-<p>Well, a line plot including only data from the highlighted countries. It shows directly the first and last value for each country and labels the series directly (it is an interactive plot as well).</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">wdiquickplots</span><span class="fu">::</span><span class="fu"><a href="reference/plot_time_wdi_ind.html">plot_time_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-lineplot-1.png" width="70%" style="display: block; margin: auto;"></p>
-</div>
-<div id="facetted-line-plot" class="section level1">
-<h1 class="hasAnchor">
-<a href="#facetted-line-plot" class="anchor"></a>Facetted line plot</h1>
-<p>Also a line plot as above, but including data for all countries. It is powered by <code>gghighlight</code> to disentangle the spaghetti plot.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">wdiquickplots</span><span class="fu">::</span><span class="fu"><a href="reference/plot_time_facets_wdi_ind.html">plot_time_facets_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-time_facets-1.svg" width="70%" style="display: block; margin: auto;"></p>
-</div>
-<div id="spaghetti-plot" class="section level1">
-<h1 class="hasAnchor">
-<a href="#spaghetti-plot" class="anchor"></a>Spaghetti plot</h1>
-<p>No one should ever see or want to see a spaghetti plot with so many series. Yet, here’s one. 🙈.</p>
-<p>Just have fun playing with it. The interactivity (powered by <code>dygraphs</code>) highlights one series at a time, and sometimes (very rarely, but sometimes), can make such a spaghetti plot useful to identify eye-catching patterns.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">wdiquickplots</span><span class="fu">::</span><span class="fu"><a href="reference/plot_spaghetti_wdi_ind.html">plot_spaghetti_wdi_ind</a></span><span class="op">(</span><span class="st">"NY.GDP.PCAP.PP.CD"</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-spaghetti-1.png" width="70%" style="display: block; margin: auto;"></p>
-</div>
-
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -3,5 +3,6 @@ pkgdown: 1.6.1
 pkgdown_sha: ~
 articles:
   features: features.html
-last_built: 2021-01-03T15:08Z
+  wdiquickplots: wdiquickplots.html
+last_built: 2021-01-03T17:15Z
 
