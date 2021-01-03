@@ -31,7 +31,6 @@ library(wdiquickplots)
 
 # Features
 
-
 ## Facet by regions or World Bank's income groups
 
 Some of the plots have facets and you can configure whether they group the data
