@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
-#devtools::load_all()
 ```
 
 This document describes a few features of the package and documents some
@@ -33,14 +32,13 @@ library(wdiquickplots)
 # Features
 
 
-
 ## Facet by regions or World Bank's income groups
 
 Some of the plots have facets and you can configure whether they group the data
 by geographical regions or income groups. Simply pass unquoted `region` or 
 `income` to the `facets` argument.
 
-```{r dist, fig.asp=870/550, fig.width=4.5, out.width="47%", dev="svg", fig.align = "default", }
+```{r dist, fig.asp=870/550, fig.width=4.5, out.width="47%", dev="svg", fig.ext = "svg", fig.align = "default"}
 plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = income, p = 0)
 plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = region, p = 0)
 ```
@@ -59,7 +57,7 @@ three arguments for this:
 - `income_groups` let's you select a group of countries, indicating World 
   Bank's income classification. `wdiquickplots:::income`
 
-```{r dist_subset, fig.asp=0.7, fig.width=5, out.width="77%", dev="svg"}
+```{r dist_subset, fig.asp=0.7, fig.width=5, out.width="77%", dev="svg", fig.ext = "svg"}
 plot_dist_wdi_ind(
   indicator = "NY.GDP.PCAP.PP.CD", facets = region, p = 0, 
   regions = c("Europe & Central Asia", "Latin America & Caribbean")
