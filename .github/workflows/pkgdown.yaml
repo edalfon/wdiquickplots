@@ -40,6 +40,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           install.packages("pkgdown", type = "binary")
+          remotes::install_github("hadley/emo")
         shell: Rscript {0}
 
       - name: Install package
