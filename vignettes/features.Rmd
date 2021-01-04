@@ -2,7 +2,7 @@
 title: "Features"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{features}
+  %\VignetteIndexEntry{Features}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

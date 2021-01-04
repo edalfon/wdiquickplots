@@ -5,7 +5,6 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/edalfon/wdiquickplots/workflows/R-CMD-check/badge.svg)](https://github.com/edalfon/wdiquickplots/actions)
 <!-- badges: end -->
 
 The goal of `wdiquickplots` is to provide, well, quick plots for World

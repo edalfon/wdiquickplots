@@ -2,7 +2,7 @@
 title: "Quickplots examples"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{wdiquickplots}
+  %\VignetteIndexEntry{Quickplots examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

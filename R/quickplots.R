@@ -128,6 +128,8 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #'
 #' @return a ggplot2 object
 #'
+#' @noRd
+#'
 #' @examples
 #' \dontrun{
 #' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
