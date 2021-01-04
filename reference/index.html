@@ -54,6 +54,16 @@
 <![endif]-->
 
 
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3E8SNHMP6Y"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3E8SNHMP6Y');
+</script>
+
 
   </head>
 
@@ -136,8 +146,8 @@
     <tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
+          <h2 id="section-plots-" class="hasAnchor"><a href="#section-plots-" class="anchor"></a>Plots!</h2>
+          <p class="section-desc"><p>Functions to create quick plots from WDI data</p></p>
         </th>
       </tr>
       
@@ -146,24 +156,6 @@
       
       
       <tr>
-        
-        <td>
-          <p><code><a href="download_wdi_ind.html">download_wdi_ind()</a></code> </p>
-        </td>
-        <td><p>Wrapper around WDI::WDI() to download data for a single indicator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="latest_wdi_ind.html">latest_wdi_ind()</a></code> </p>
-        </td>
-        <td><p>Get latest data for a single indicator per country</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="modulus_breaks.html">modulus_breaks()</a></code> </p>
-        </td>
-        <td><p>Modulus breaks factory</p></td>
-      </tr><tr>
         
         <td>
           <p><code><a href="plot_bar_wdi_ind.html">plot_bar_wdi_ind()</a></code> </p>
@@ -177,12 +169,6 @@
         <td><p>Plot the distribution (density) of a single indicator using WDI data,
 downloading the data as necessary for the period indicated by start and end,
 and keeping only the latest data point available for each country</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_dist_wdi_ind_ggpdef.html">plot_dist_wdi_ind_ggpdef()</a></code> </p>
-        </td>
-        <td><p>Plot a WDI indicator</p></td>
       </tr><tr>
         
         <td>
