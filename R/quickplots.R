@@ -29,11 +29,12 @@ income_groups <- c(
 #' @param income_groups character vector to filter the data only to specific
 #'                      sincome groups
 #'
-#' @return data.frame with columns country, year, plot_ind, region, income,
-#'         highlight. highlight = NA, except for highlight countries in which
-#'         case takes the value of plot_ind
+#' @return data.frame with columns country, year, ind_1, region, income,
+#'         highlight_ind_1. highlight_ind_1 = NA, except for highlight
+#'         countries in which case, it takes the value of ind_1
 #'
 #' @importFrom tidyr drop_na
+#' @importFrom stats setNames
 #' @export
 #'
 #' @examples
@@ -49,24 +50,30 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              regions = wdiquickplots:::regions,
                              income_groups = wdiquickplots:::income_groups) {
 
-  year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
+  year <- ind_1 <- region <- income <- NULL # or use the .data pronoun
 
   regions <- match.arg(regions, several.ok = TRUE)
   income_groups <- match.arg(income_groups, several.ok = TRUE)
 
   wdi_data <- memoised_wdi(
     country = country,
-    indicator = c(plot_ind = indicator), # named vector will be renamed, thx WDI
+    # named vector will be renamed, thx WDI
+    indicator = setNames(indicator, paste0("ind_", 1:length(indicator))),
     start = start,
     end = end,
     extra = TRUE # to always get region and income level
   )
 
   wdi_data %>%
-    select(country, year, plot_ind, region, income) %>%
+    select(country, year, region, income, dplyr::starts_with("ind_")) %>%
     drop_na() %>%
     filter(region != "Aggregates") %>%
-    mutate(highlight = ifelse(country %in% highlight_countries, plot_ind, NA)) %>%
+    #mutate(highlight = ifelse(country %in% highlight_countries, ind_1, NA)) %>%
+    mutate(dplyr::across(
+      .cols = dplyr::starts_with("ind_"),
+      .fns = ~ dplyr::case_when(country %in% highlight_countries ~ .x),
+      .names = "highlight_{.col}"
+    )) %>%
     mutate(income = factor(income, levels = c(
       "Aggregates", "High income", "Upper middle income", "Lower middle income",
       "Low income", NA
@@ -85,9 +92,9 @@ memoised_wdi <- memoise::memoise(
 #'
 #' @inheritParams download_wdi_ind
 #'
-#' @return data.frame with columns country, year, plot_ind, region, income,
-#'         highlight. highlight = NA, except for highlight countries in which
-#'         case takes the value of plot_ind
+#' @return data.frame with columns country, year, ind_1, region, income,
+#'         highlight_ind_1. highlight_ind_1 = NA, except for highlight
+#'         countries in which case, it takes the value of ind_1
 #'
 #' @importFrom tidyr drop_na
 #' @export
@@ -105,7 +112,7 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                            regions = wdiquickplots:::regions,
                            income_groups = wdiquickplots:::income_groups) {
 
-  year <- plot_ind <- region <- income <- NULL # or use the .data pronoun
+  year <- NULL # or use the .data pronoun
 
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
@@ -133,7 +140,7 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' @examples
 #' \dontrun{
 #' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
-#' plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight, p)
+#' plot_dist_wdi_ind_ggpdef(wdi_data, ind_1, {{ facets }}, country, highlight, p)
 #' }
 plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
                                      year, p = 1) {
@@ -241,12 +248,12 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               regions = wdiquickplots:::regions,
                               income_groups = wdiquickplots:::income_groups,
                               p = 1) {
-  plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
+  ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
                              country, regions, income_groups)
 
-  plot_dist_wdi_ind_ggpdef(wdi_data, plot_ind, {{ facets }}, country, highlight,
+  plot_dist_wdi_ind_ggpdef(wdi_data, ind_1, {{ facets }}, country, highlight_ind_1,
                            year, p)
 }
 
@@ -281,22 +288,22 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
   # TODO: let the user decide whether horizontal or vertical bar plot
   # https://plotly.com/r/reference/
 
-  plot_ind <- region <- highlight <- year <- NULL # or use the .data pronoun
+  ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
                              country, regions, income_groups)
 
   wdi_data <- wdi_data %>%
     mutate(text = dplyr::case_when(
-      !is.na(highlight) ~ paste0(country, " [", scales::comma(highlight), "]")
+      !is.na(highlight_ind_1) ~ paste0(country, " [", scales::comma(highlight_ind_1), "]")
     )) %>%
-    mutate(color = dplyr::case_when(!is.na(highlight) ~ highlight_color,
+    mutate(color = dplyr::case_when(!is.na(highlight_ind_1) ~ highlight_color,
                                     TRUE ~ base_color))
 
   plotly::plot_ly(
     data = wdi_data,
-    x = ~plot_ind,
-    y = ~reorder(country, plot_ind),
+    x = ~ind_1,
+    y = ~reorder(country, ind_1),
     text = ~text,
     textposition = 'outside',
     textfont = list(face = "bold", color = '#000000', size = 14),
@@ -312,7 +319,7 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
       # -font-size-limit-on-labels-in-r-plotly-bar-charts
       uniformtext = list(minsize  =14, mode = "show"),
       xaxis = list(title = paste0(
-        attr(wdi_data$plot_ind, "label"), "\nYear ",
+        attr(wdi_data$ind_1, "label"), "\nYear ",
         wdi_data$year %>% vctrs::vec_slice(i = 1), " *"
       )),
       yaxis = list(title = NA, tickfont = list(size = 7))
@@ -343,25 +350,25 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
                               income_groups = wdiquickplots:::income_groups,
                               p = 1) {
 
-  region <- year <- plot_ind <- highlight <- NULL
+  region <- year <- ind_1 <- highlight_ind_1 <- NULL
 
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
-  ggplot(aes(x = year, y = plot_ind, color = country), data = wdi_data) +
+  ggplot(aes(x = year, y = ind_1, color = country), data = wdi_data) +
     geom_point() +
     geom_line(aes(group = country), size = 1.5) +
     facet_wrap(vars({{facets}})) +
     gghighlight::gghighlight(
-      !is.na(highlight),
+      !is.na(highlight_ind_1),
       calculate_per_facet = TRUE,
       use_direct_label = TRUE,
       label_params = list(fill = "white", point.padding = 0.1, direction = "y")
     ) +
     scale_y_continuous(
-      name = attr(wdi_data$plot_ind, "label"),
+      name = attr(wdi_data$ind_1, "label"),
       trans = scales::modulus_trans(p),
-      labels = get_formatter(wdi_data$plot_ind),
+      labels = get_formatter(wdi_data$ind_1),
       breaks = modulus_breaks(p),
       guide = guide_axis(check.overlap = TRUE),
       expand = c(0, 0)
@@ -393,27 +400,27 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   # TODO: allow transformation passing p as in otherss
 
-  year <- plot_ind <- highlight <- NULL
+  year <- ind_1 <- highlight_ind_1 <- NULL
 
   # TODO: here you could actually download only the highlight countries
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
-  custom_formatter <- get_formatter(wdi_data$plot_ind)
+  custom_formatter <- get_formatter(wdi_data$ind_1)
 
   wdi_data <- wdi_data %>%
-    filter(!is.na(highlight)) %>%
+    filter(!is.na(highlight_ind_1)) %>%
     group_by(country) %>%
     mutate(direct_labels = case_when(
-      year == max(year, na.rm = TRUE) ~ paste0(country, "\n", custom_formatter(plot_ind)),
-      year == min(year, na.rm = TRUE) ~ custom_formatter(plot_ind)
+      year == max(year, na.rm = TRUE) ~ paste0(country, "\n", custom_formatter(ind_1)),
+      year == min(year, na.rm = TRUE) ~ custom_formatter(ind_1)
     )) %>%
     dplyr::arrange(country, year) # I hate that plotly makes you arrange it
 
   plotly::plot_ly(
     data = wdi_data,
     x = ~ year,
-    y = ~ plot_ind,
+    y = ~ ind_1,
     # groups and assigns different colors in one step
     color = ~ country,
     # name = 'all_terms',
@@ -428,7 +435,7 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
     ) %>%
     plotly::layout(
       showlegend = FALSE,
-      yaxis = list(title = attr(wdi_data %>% pull(plot_ind), "label")),
+      yaxis = list(title = attr(wdi_data %>% pull(ind_1), "label")),
       yaxis = list(title = NA)
     )
 }
@@ -451,20 +458,20 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   # TODO: allow transformation passing p as in otherss
 
-  year <- plot_ind <- highlight <- region <- income <- NULL
+  year <- ind_1 <- highlight_ind_1 <- region <- income <- NULL
 
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   wdi_data_wide <- wdi_data %>%
-    select(-region, -income, -highlight) %>%
-    tidyr::pivot_wider(names_from = country, values_from = plot_ind) %>%
+    select(-region, -income, -highlight_ind_1) %>%
+    tidyr::pivot_wider(names_from = country, values_from = ind_1) %>%
     dplyr::arrange(year)
 
   dy_spaghetti <- dygraphs::dygraph(
     data = wdi_data_wide,
     xlab = "",
-    ylab = attr(wdi_data$plot_ind, "label")
+    ylab = attr(wdi_data$ind_1, "label")
   ) %>%
     dygraphs::dyOptions(drawPoints = TRUE, pointSize = 2) %>%
     dygraphs::dyHighlight(
@@ -501,40 +508,40 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   # TODO: allow transformation passing p as in otherss
 
-  year <- plot_ind <- highlight <- region <- income <- highlight_country <-
-    highlight_country_label <- highlight_dummy <- plot_ind_fill <- NULL
+  year <- ind_1 <- highlight_ind_1 <- region <- income <- highlight_country <-
+    highlight_country_label <- highlight_dummy <- ind_1_fill <- NULL
 
   wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
-  custom_formatter <- get_formatter(wdi_data$plot_ind)
+  custom_formatter <- get_formatter(wdi_data$ind_1)
 
   wdi_race_data <- wdi_data %>%
     # most probably, there will be missing values in some countries for some years
     # so here's a controversial decision to make the animation look good
     # let's fill missing values for each country, by interpolating values in
     # the gaps and filling with the first or last value available
-    tidyr::complete(country, year) %>% # not there will be NA in plot_ind
+    tidyr::complete(country, year) %>% # not there will be NA in ind_1
     group_by(country) %>%
     arrange(country, year) %>%
-    mutate(plot_ind_fill = zoo::na.approx(plot_ind, na.rm = FALSE)) %>%
-    tidyr::fill(plot_ind_fill, .direction = "downup") %>%
-    mutate(highlight = zoo::na.approx(highlight, na.rm = FALSE)) %>%
-    tidyr::fill(highlight, .direction = "downup") %>%
+    mutate(ind_1_fill = zoo::na.approx(ind_1, na.rm = FALSE)) %>%
+    tidyr::fill(ind_1_fill, .direction = "downup") %>%
+    mutate(highlight_ind_1 = zoo::na.approx(highlight_ind_1, na.rm = FALSE)) %>%
+    tidyr::fill(highlight_ind_1, .direction = "downup") %>%
     ungroup() %>%
     # Try to be transparent about it and signal the country name with an *
     # whenever there was a missing value
-    mutate(country_label = ifelse(is.na(plot_ind), paste0(country, "*"), country)) %>%
+    mutate(country_label = ifelse(is.na(ind_1), paste0(country, "*"), country)) %>%
     # leave unhighlighted countries as NA, then the fill color will be grey
-    mutate(highlight_country = case_when(!is.na(highlight) ~ country)) %>%
+    mutate(highlight_country = case_when(!is.na(highlight_ind_1) ~ country)) %>%
     mutate(highlight_country_label = case_when(
-      !is.na(highlight) ~ paste0(country_label, " (", custom_formatter(highlight), ")"),
+      !is.na(highlight_ind_1) ~ paste0(country_label, " (", custom_formatter(highlight_ind_1), ")"),
       TRUE ~ ""
     )) %>%
-    mutate(highlight_dummy = case_when(!is.na(highlight) ~ 1, TRUE ~ 0.77)) %>%
+    mutate(highlight_dummy = case_when(!is.na(highlight_ind_1) ~ 1, TRUE ~ 0.77)) %>%
     # Now calculate country rank in every year, for the animated plot
     group_by(year) %>%
-    arrange(year, -plot_ind_fill) %>%
+    arrange(year, -ind_1_fill) %>%
     mutate(rank = 1:n()) %>%
     mutate(rank = -rank) %>%
     ungroup()
@@ -546,7 +553,7 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
     facet_wrap(vars(year)) +
     geom_rect(aes(
       xmin = 0,
-      xmax = plot_ind_fill,
+      xmax = ind_1_fill,
       ymin = rank - .5,
       ymax = rank + .5,
       fill = highlight_country,
@@ -561,11 +568,11 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
     geom_text(aes(
       label = highlight_country_label,
       y = rank,
-      x = plot_ind_fill
+      x = ind_1_fill
     ), hjust = 0) +
     scale_y_discrete("", expand = c(0, 0)) +
     scale_x_continuous(
-      name = attr(wdi_data$plot_ind, "label"),
+      name = attr(wdi_data$ind_1, "label"),
       trans = scales::modulus_trans(p),
       labels = custom_formatter,
       breaks = modulus_breaks(p),

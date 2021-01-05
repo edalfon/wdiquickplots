@@ -33,9 +33,9 @@ This argument is passed as is to WDI::WDI and hence, requires
 sincome groups}
 }
 \value{
-data.frame with columns country, year, plot_ind, region, income,
-        highlight. highlight = NA, except for highlight countries in which
-        case takes the value of plot_ind
+data.frame with columns country, year, ind_1, region, income,
+        highlight_ind_1. highlight_ind_1 = NA, except for highlight
+        countries in which case, it takes the value of ind_1
 }
 \description{
 Get latest data for a single indicator per country

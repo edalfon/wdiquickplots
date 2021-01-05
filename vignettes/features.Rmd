@@ -120,9 +120,28 @@ directly `WDI` to get the data and make your own plot.
 
 ## Interpolation for a smooth race plot
 
+Frequently there will be missing values here and there in the WDI data. 
+`NA` for some years and some countries will be most probably the norm. 
+That would make the race plot unworkable because countries (in the y-axis) will 
+go in and out of the plot. For a race plot, it is key to keep the set of 
+categories constant in time. Having this in mind, for the race plot we keep 
+all countries that have at least one non-missing value in the period of time for
+the plot. And to keep all countries in all years, we just replace missing 
+values by interpolating between valid values for each country. We also put an 
+asterisk next to the country name whenever an interpolated point is being shown. 
 
+## memoise WDI calls
 
-## memoise
+Although we are always dealing with rather small datasets in this package, every
+`WDI` call is still an API call to download the data. To speed things up a
+little and avoid downloading the same data again and again (e.g. to use the same
+data for two different plots), we `memoise` WDI calls. We use
+`memoise::cache_filesystem` which should be persistent across R sessions. Cache
+location is ~/wdiquickplots_cache.
 
-Although memoise does a great job, there's the famouse quote that there are only
-two hard things, cache invalidation and naming things. So, if you find memoise is creating problems, just delete the cache as follows.
+`memoise` does a great job. But as the famous quote goes, there are only
+two hard things, cache invalidation and naming things. So, if you ever think 
+caching `WDI` calls is creating problems, just delete the cache either by 
+running `memoise::forget(wdiquickplots:::memoised_wdi)` or just finding the 
+cache in your file system and deleting the directory.
+

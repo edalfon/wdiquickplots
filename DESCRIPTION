@@ -37,7 +37,8 @@ Suggests:
     spelling,
     knitr,
     rmarkdown,
-    webshot
+    webshot,
+    emo
 Language: en-US
 VignetteBuilder: knitr
 URL: https://github.com/edalfon/wdiquickplots
