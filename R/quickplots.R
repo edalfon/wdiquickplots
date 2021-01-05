@@ -177,6 +177,8 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
       lineheight = 0.75,
       fontface = "bold"
     ) +
+    coord_cartesian(clip = "off") +
+    scale_y_continuous("Density", expand = expansion(mult = c(0, 0.25))) +
     #' There is an issue here, if put in separate geoms, vjust can end up
     #' being inconsistent, so let's put them together in one geom even though
     #' I would have preferred two separate geoms with y = 0 and y = Inf
@@ -212,7 +214,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
     #   direction = -1
     # ) +
     theme(legend.position = "none") +
-    ylab("Density") +
+    #ylab("Density") +
     labs(caption = ifelse(p != 1, glue::glue("Transformed scale modulus({p})"), ""))
 
   if (any("income" %in% names(select(wdi_data, {{ facets }})))) {
