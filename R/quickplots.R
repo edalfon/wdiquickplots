@@ -171,6 +171,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
       ),
       # direction = "y", # only let ggrepel to adjust horizontally
       point.padding = NA, # never repel if there is only 1 highlight in a facet
+      box.padding = 0,
       vjust = 1,
       hjust = 0.5,
       lineheight = 0.75,
