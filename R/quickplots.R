@@ -169,7 +169,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
           get_formatter(pull(wdi_data, {{ ind }}))({{ highlight }})
         )
       ),
-      # direction = "y", # only let ggrepel to adjust horizontally
+      direction = "x", # only let ggrepel to adjust horizontally
       point.padding = NA, # never repel if there is only 1 highlight in a facet
       ylim = c(NA, Inf), # do not repel from top edge, let vjust do the work
       vjust = 1,
@@ -177,7 +177,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
       lineheight = 0.75,
       fontface = "bold"
     ) +
-    coord_cartesian(clip = "off") +
+    # coord_cartesian(clip = "off") +
     scale_y_continuous("Density", expand = expansion(mult = c(0, 0.25))) +
     #' There is an issue here, if put in separate geoms, vjust can end up
     #' being inconsistent, so let's put them together in one geom even though
