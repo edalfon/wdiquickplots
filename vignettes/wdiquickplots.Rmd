@@ -30,7 +30,7 @@ library(wdiquickplots)
 A plot to quickly compare highlighted countries, among them, and with the 
 rest of the world using either region or income, to group countries.
 
-```{r dist_gini, fig.asp=870/550, fig.width=4, out.width="47%", dev="svg", fig.ext="svg"}
+```{r dist_gini, fig.asp=870/550, fig.width=6, out.width="47%", dev="svg", fig.ext="svg"}
 plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
