@@ -36,9 +36,7 @@ Suggests:
     testthat,
     spelling,
     knitr,
-    rmarkdown,
-    webshot,
-    emo
+    rmarkdown
 Language: en-US
 VignetteBuilder: knitr
 URL: https://github.com/edalfon/wdiquickplots
