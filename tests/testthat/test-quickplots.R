@@ -7,13 +7,18 @@ test_that("download_wdi_ind works", {
 
   expect_named(
     download_wdi_ind("NY.GDP.PCAP.KD"),
-    c("country", "year", "ind_1", "region", "income", "highlight_ind_1"),
+    c("country", "year", "region", "income",
+      "is_highlight", "highlighted_country",
+      "ind_1", "highlight_ind_1"
+      ),
     ignore.order = TRUE
   )
 
   expect_named(
     download_wdi_ind(c("NY.GDP.PCAP.KD", "SI.POV.GINI")),
-    c("country", "year", "ind_1", "ind_2", "region", "income",
+    c("country", "year", "region", "income",
+      "is_highlight", "highlighted_country",
+      "ind_1", "ind_2",
       "highlight_ind_1", "highlight_ind_2"),
     ignore.order = TRUE
   )
@@ -24,3 +29,27 @@ test_that("download_wdi_ind works", {
   )
 
 })
+
+test_that("modulus_breaks do not make things too weird", {
+
+  # p_custom = 1 should mean no transformation
+  custom_breaks_fn <- modulus_breaks(p_custom = 1, n.breaks_default = 10)
+
+  test_limits <- c(0.21037169, 9.27377033)
+
+  standard_breaks_fn <- scales::extended_breaks(n = 10)
+
+  custom_breaks <- custom_breaks_fn(test_limits)
+  standard_breaks <- standard_breaks_fn(test_limits)
+
+  expect_lt(
+    (length(custom_breaks) - length(standard_breaks)) / max(length(custom_breaks), length(standard_breaks)),
+    0.2
+  )
+
+  expect_gt(
+    length(intersect(standard_breaks, custom_breaks)) / max(length(custom_breaks), length(standard_breaks)),
+    0.8
+  )
+})
+

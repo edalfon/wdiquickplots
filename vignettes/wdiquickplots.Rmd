@@ -79,7 +79,7 @@ plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
 # Spaghetti plot
 
 No one should ever see or want to see a spaghetti plot with so many series. 
-Yet, here's one. `r emo::ji("see_no_evil_monkey")`.
+Yet, here's one. 
 
 Just have fun playing with it. The interactivity (powered by `dygraphs`)
 highlights one series at a time, and sometimes (very rarely, but sometimes), can 
@@ -89,6 +89,47 @@ make such a spaghetti plot useful to identify eye-catching patterns.
 ```{r spaghetti}
 plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
 ```
+
+# Bubble plot
+
+A quick-to-create bubble plot. Basically a function to produce a scatter plot
+and you pass the codes for the indicators you want in the x and y axis, as well
+as the indicator to map the size of the markers to.
+
+Let's see an example showing public health expenditure vs. risk of catastrophic 
+health expenditure.
+
+## Static
+
+There is a static version, powered by `ggplot2`.
+
+```{r bubble_gg, dev="svg", fig.ext="svg"}
+plot_bubble_gg_wdi_ind(
+  x_indicator = "SH.XPD.GHED.GD.ZS",
+  y_indicator = "SH.SGR.CRSK.ZS",
+  size_indicator = "SP.POP.TOTL",
+  highlight_countries = c("India", "Germany", "Brazil")
+) %>% plotly::ggplotly()
+```
+
+## Interactive
+
+An although you can convert the static bubble plot to an interactive one 
+(e.g. using plotly::ggplotly), those automatic conversions usually leave 
+a few things that could be better. Thus, there is also an interactive version, 
+powered by `plotly`.
+
+```{r bubble_ly}
+plot_bubble_ly_wdi_ind(
+  x_indicator = "SH.XPD.GHED.GD.ZS",
+  y_indicator = "SH.SGR.CRSK.ZS",
+  size_indicator = "SP.POP.TOTL",
+  highlight_countries = c("India", "Germany", "Brazil")
+)
+```
+
+
+
 
 
 

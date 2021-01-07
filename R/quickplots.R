@@ -50,7 +50,7 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              regions = wdiquickplots:::regions,
                              income_groups = wdiquickplots:::income_groups) {
 
-  year <- ind_1 <- region <- income <- NULL # or use the .data pronoun
+  year <- ind_1 <- region <- income <- is_highlight <- NULL # or use the .data pronoun
 
   regions <- match.arg(regions, several.ok = TRUE)
   income_groups <- match.arg(income_groups, several.ok = TRUE)
@@ -66,9 +66,10 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
   wdi_data %>%
     select(country, year, region, income, dplyr::starts_with("ind_")) %>%
-    drop_na() %>%
+    drop_na() %>% # note that for multiple indicators, drops for only one NA
     filter(region != "Aggregates") %>%
-    #mutate(highlight = ifelse(country %in% highlight_countries, ind_1, NA)) %>%
+    mutate(is_highlight = country %in% highlight_countries) %>%
+    mutate(highlighted_country = ifelse(is_highlight, country, NA)) %>%
     mutate(dplyr::across(
       .cols = dplyr::starts_with("ind_"),
       .fns = ~ dplyr::case_when(country %in% highlight_countries ~ .x),
@@ -150,6 +151,8 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
   #   mutate(custom_hjust = scales::rescale(-{{highlight}}, to = c(0, 1))) %>%
   #   ungroup()
 
+  all_years <- vctrs::vec_count(wdi_data %>% pull({{ year }}))$key
+
   the_plot <- ggplot(aes(x = {{ ind }}, fill = {{ facets }}), data = wdi_data) +
     facet_wrap(vars({{ facets }}), ncol = 1, scales = "free_y") +
     geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
@@ -196,7 +199,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
     scale_x_continuous(
       name = paste0(
         attr(wdi_data %>% pull({{ ind }}), "label"), "\nYear ",
-        wdi_data %>% pull({{ year }}) %>% vctrs::vec_slice(i = 1), " *"
+        all_years[[1]], ifelse(length(all_years) > 1, " *", "")
         # TODO: find better way to signal a few other years are there as well
       ),
       trans = scales::modulus_trans(p),
@@ -251,6 +254,7 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               regions = wdiquickplots:::regions,
                               income_groups = wdiquickplots:::income_groups,
                               p = 1) {
+
   ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
   wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
@@ -303,6 +307,8 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     mutate(color = dplyr::case_when(!is.na(highlight_ind_1) ~ highlight_color,
                                     TRUE ~ base_color))
 
+  all_years <- vctrs::vec_count(wdi_data$year)$key
+
   plotly::plot_ly(
     data = wdi_data,
     x = ~ind_1,
@@ -323,7 +329,8 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
       uniformtext = list(minsize  =14, mode = "show"),
       xaxis = list(title = paste0(
         attr(wdi_data$ind_1, "label"), "\nYear ",
-        wdi_data$year %>% vctrs::vec_slice(i = 1), " *"
+        all_years[[1]], ifelse(length(all_years) > 1, " *", "")
+        # TODO: find better way to signal a few other years are there as well
       )),
       yaxis = list(title = NA, tickfont = list(size = 7))
     )
@@ -641,16 +648,18 @@ modulus_breaks <- function(p_custom, n.breaks_default = 10) {
       Q = scales::modulus_trans(p)$transform(c(1, 5, 2, 2.5, 4, 3))
     )
     # But apply the inverse to express the breaks on the original scale
-    breaks_trans <- scales::modulus_trans(p)$inverse(breaks_trans)
-    # And also calculate breaks on the original scale
-    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
-    breaks_combined <- sort(c(breaks_trans, breaks_notrans))
     # breaks calculated on the original  scale are already pretty, but the
     # breaks calculated on the transformed scale are not (more precisely, they
     # are only pretty on the transformed scale, but we want them in the end on
     # the original scale)
-    breaks_final <- purrr::map_dbl(breaks_combined, ~ dplyr::first(pretty(.x, n = 1)))
-    breaks_final
+    breaks_trans <- scales::modulus_trans(p)$inverse(breaks_trans)
+    breaks_trans <- purrr::map_dbl(breaks_trans, ~ pretty(.x, n = 1)[which.min(abs(pretty(.x, n = 1) - .x))])
+    # And also calculate breaks on the original scale
+    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
+    # ANd finally put them together
+    breaks_combined <- unique(sort(c(breaks_trans, breaks_notrans)))
+    #breaks_final <- purrr::map_dbl(breaks_combined, ~ dplyr::first(pretty(.x, n = 1)))
+    breaks_combined
   }
 }
 
@@ -661,4 +670,174 @@ get_formatter <- function(plot_data) {
   return(scales::comma_format(accuracy = 1))
 }
 
-# TODO: bring the bubble plot
+#' Bubble plot, interactive (powered by plotly)
+#'
+#' Scatter plot that let's you map the size of the markers to an indicator
+#'
+#' @inheritParams download_wdi_ind
+#' @param x_indicator code of indicator for the x axis
+#' @param y_indicator code of indicator for the y axis
+#' @param size_indicator code of indicator for the size of the markers
+#'
+#' @return a plotly object
+#' @export
+#'
+#' @examples
+plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+                                   y_indicator = "SH.SGR.CRSK.ZS",
+                                   size_indicator = "SP.POP.TOTL",
+                                   highlight_countries = c("Colombia", "Germany"),
+                                   start = lubridate::year(Sys.Date()) - 10,
+                                   end = lubridate::year(Sys.Date()),
+                                   country = "all",
+                                   regions = wdiquickplots:::regions,
+                                   income_groups = wdiquickplots:::income_groups) {
+
+  # TODO: format numbers
+  # TODO: allow modulus transformations, receiving p_x and p_y
+  # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
+
+  is_highlight <- NULL
+
+  wdi_data <- latest_wdi_ind(
+    c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
+    end, country, regions, income_groups
+  )
+
+  all_years <- vctrs::vec_count(wdi_data$year)$key
+
+  highlight_data <- wdi_data %>%
+    filter(is_highlight)
+
+  ind_1_lab <- attr(wdi_data$ind_1, "label")
+  ind_2_lab <- attr(wdi_data$ind_2, "label")
+  ind_3_lab <- attr(wdi_data$ind_3, "label")
+
+  wdi_data %>%
+    plotly::plot_ly(
+      type = 'scatter',
+      mode = 'markers',
+      x = ~ind_1,
+      y = ~ind_2,
+      size = ~ind_3,
+      text = ~paste0(
+        "<b>", country, "</b> (", year,")<br><br>",
+        ind_1_lab, ":<br>", get_formatter(wdi_data$ind_1)(ind_1), "<br><br>",
+        ind_2_lab, ":<br>", get_formatter(wdi_data$ind_2)(ind_2),"<br><br>",
+        ind_3_lab, ":<br>", get_formatter(wdi_data$ind_3)(ind_3)
+      ),
+      color = ~tidyr::replace_na(highlighted_country, "NA"),
+      marker = list(opacity = 0.35, sizemode = 'diameter'),
+      sizes = c(10, 50),
+      hoverinfo = 'text'
+    ) %>%
+    plotly::add_markers( # just override the data and marker styling
+      data = highlight_data, # including only highlighted countries
+      marker = list(opacity = 1) # and solid markers
+    ) %>%
+    plotly::add_annotations(
+      x = highlight_data$ind_1,
+      y = highlight_data$ind_2,
+      text = paste0("<b>", highlight_data$country, "</b>"),
+      showarrow = FALSE,
+      xanchor = "left",
+      yanchor = "bottom"
+    ) %>%
+    plotly::layout(
+      title = paste0("Year ", all_years[[1]], ifelse(length(all_years) > 1, " *", "")),
+      showlegend = FALSE,
+      xaxis = list(title = ind_1_lab, showgrid = FALSE),
+      yaxis = list(title = ind_2_lab, showgrid = FALSE)
+    )
+}
+
+#' Bubble plot
+#'
+#' Scatter plot that let's you map the size of the markers to an indicator
+#'
+#' @inheritParams download_wdi_ind
+#' @param x_indicator code of indicator for the x axis
+#' @param y_indicator code of indicator for the y axis
+#' @param size_indicator code of indicator for the size of the markers
+#' @param p_x Transformation exponent for x-axis, as in scales::modulus_trans
+#' @param p_y Transformation exponent for y-axis, as in scales::modulus_trans
+#'
+#' @return a ggplot2 object
+#' @export
+#'
+#' @examples
+plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+                                   y_indicator = "SH.SGR.CRSK.ZS",
+                                   size_indicator = "SP.POP.TOTL",
+                                   highlight_countries = c("Colombia", "Germany"),
+                                   start = lubridate::year(Sys.Date()) - 10,
+                                   end = lubridate::year(Sys.Date()),
+                                   country = "all",
+                                   regions = wdiquickplots:::regions,
+                                   income_groups = wdiquickplots:::income_groups,
+                                   p_x = 1,
+                                   p_y = 1) {
+
+  # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
+
+  ind_1 <- ind_2 <- ind_3 <- alpha <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
+
+  wdi_data <- latest_wdi_ind(
+    c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
+    end, country, regions, income_groups
+  )
+
+  wdi_data <- wdi_data %>%
+    mutate(alpha = case_when(is_highlight ~ 1, TRUE ~ 0.35))
+
+  all_years <- vctrs::vec_count(wdi_data$year)$key
+
+  ind_1_lab <- attr(wdi_data$ind_1, "label")
+  ind_2_lab <- attr(wdi_data$ind_2, "label")
+  ind_3_lab <- attr(wdi_data$ind_3, "label")
+
+  wdi_data %>%
+    ggplot() +
+    aes(x = ind_1, y = ind_2) +
+    geom_point(aes(size = ind_3, alpha = alpha, color = highlighted_country)) +
+    ggrepel::geom_text_repel(aes(label = highlighted_country), fontface = "bold") +
+    ggthemes::theme_tufte() +
+    scale_alpha(range = c(0.35, 1), guide = FALSE) +
+    scale_color_brewer(palette="Set2", na.value="grey70", guide = FALSE) +
+    scale_size(
+      name = ind_3_lab,
+      range = c(2, 20),
+      breaks = modulus_breaks(0, 4),
+      labels = get_formatter(wdi_data$ind_3)
+    ) +
+    scale_x_continuous(
+      name = attr(wdi_data$ind_1, "label"),
+      trans = scales::modulus_trans(p_x),
+      labels = get_formatter(wdi_data$ind_1),
+      breaks = modulus_breaks(p_x),
+      guide = guide_axis(check.overlap = TRUE)
+    ) +
+    scale_y_continuous(
+      name = attr(wdi_data$ind_2, "label"),
+      trans = scales::modulus_trans(p_y),
+      labels = get_formatter(wdi_data$ind_2),
+      breaks = modulus_breaks(p_y),
+      guide = guide_axis(check.overlap = TRUE)
+    ) +
+    # ggplot2::geom_smooth() + TODO: conditional?
+    theme(panel.border = element_rect(colour = "grey", fill = NA)) +
+    guides(size = guide_legend(override.aes = list(size=c(2, 4, 6, 8)))) +
+    theme(legend.position = "top") +
+    labs(caption = paste(
+      ifelse(p_x != 1, glue::glue("x-axis transformed scale modulus({p_x}) "), ""),
+      ifelse(p_y != 1, glue::glue("y-axis transformed scale modulus({p_y}) "), "")
+    )) +
+    labs(subtitle = paste0(
+      "Year ", all_years[[1]], ifelse(length(all_years) > 1, " *", "")
+    ))
+}
+
+
+# TODO: bring the bubble plot, dynamic
+
+
