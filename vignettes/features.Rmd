@@ -118,7 +118,7 @@ That would also indicate you need something different than the prefabricated
 plots in this package. In those cases, you are probably better off using
 directly `WDI` to get the data and make your own plot.
 
-## Interpolation for a smooth race plot
+## Interpolation for smooth animated plots
 
 Frequently there will be missing values here and there in the WDI data. 
 `NA` for some years and some countries will be most probably the norm. 
@@ -127,8 +127,19 @@ go in and out of the plot. For a race plot, it is key to keep the set of
 categories constant in time. Having this in mind, for the race plot we keep 
 all countries that have at least one non-missing value in the period of time for
 the plot. And to keep all countries in all years, we just replace missing 
-values by interpolating between valid values for each country. We also put an 
-asterisk next to the country name whenever an interpolated point is being shown. 
+values by interpolating between valid values for each country. 
+
+Animated bubble plots are much more noisy without interpolation. Missing values 
+would be basically points that would go in and out of the plot, and that 
+movement would be animated creating just confusion. So, we also use 
+interpolated data for those animated plots.
+
+In all cases, we put in the plot indicators whenever an interpolated point for a
+highlighted country is being shown. Those warning signs are superscript numbers,
+`r "\u00b9"`,  `r "\u00b2"`, `r "\u00b3"`, and they signal, respectively, that 
+the x, y or size indicators have been interpolated. Hopefully that's transparent 
+enough.
+
 
 ## memoise WDI calls
 

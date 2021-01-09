@@ -10,10 +10,11 @@
 The goal of `wdiquickplots` is to provide, well, quick plots for World
 Development Indicators (WDI, [“the primary World Bank collection of
 development indicators, compiled from officially recognized
-international sources.”](https://databank.worldbank.org/home.aspx)). To
-get WDI data, this package is powered by
+international sources.”](https://databank.worldbank.org/home.aspx)).
+Just jump to the “Get started” page if you want to take a look at all
+the quick plots examples. To get WDI data, this package is powered by
 [`WDI`](http://vincentarelbundock.github.io/WDI/) package, developed by
-Vincent Arel-Bundock.
+Vincent Arel-Bundock.s
 
 ## Installation
 
@@ -57,10 +58,9 @@ And that’s it.
 
 You can read other details and description of features [in the `pkgdown`
 site for this little package](https://edalfon.github.io/wdiquickplots/)
-(I know, a `pkgdown` site may be overkill, but anyway). [There you can
-also see examples for all the quick plots in this
-package](https://edalfon.github.io/wdiquickplots/docs/articles/wdiquickplots.html),
-but in general, they quickly show:
+(I know, a `pkgdown` site may be overkill, but anyway). There you can
+also see examples for all the quick plots in this package, but in
+general, they quickly show:
 
   - Where the highlighted countries stand in terms of the indicator of
     interest.
