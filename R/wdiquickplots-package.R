@@ -5,7 +5,7 @@
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
 #' @importFrom dplyr select filter mutate group_by ungroup case_when pull
-#'                   arrange n
+#'                   arrange n across starts_with
 #' @importFrom ggplot2 aes geom_density geom_point geom_rug geom_point
 #'                     element_rect facet_wrap geom_line geom_vline ggplot
 #'                     guide_axis labs scale_color_brewer scale_fill_brewer

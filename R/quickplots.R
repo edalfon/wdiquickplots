@@ -48,14 +48,15 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              end = lubridate::year(Sys.Date()),
                              country = "all",
                              regions = wdiquickplots:::regions,
-                             income_groups = wdiquickplots:::income_groups) {
+                             income_groups = wdiquickplots:::income_groups,
+                             interpolate = FALSE) {
 
   year <- ind_1 <- region <- income <- is_highlight <- NULL # or use the .data pronoun
 
   regions <- match.arg(regions, several.ok = TRUE)
   income_groups <- match.arg(income_groups, several.ok = TRUE)
 
-  wdi_data <- memoised_wdi(
+  wdi_raw <- memoised_wdi(
     country = country,
     # named vector will be renamed, thx WDI
     indicator = setNames(indicator, paste0("ind_", 1:length(indicator))),
@@ -64,10 +65,19 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     extra = TRUE # to always get region and income level
   )
 
-  wdi_data %>%
-    select(country, year, region, income, dplyr::starts_with("ind_")) %>%
-    drop_na() %>% # note that for multiple indicators, drops for only one NA
+  wdi_data <- wdi_raw %>%
+    select(country, year, region, income, dplyr::starts_with("ind_"))
+
+  # TODO: perhaps let interpolate before or after removing NAs
+  if (isTRUE(interpolate)) {
+    wdi_data <- interpolate_wdi(wdi_data)
+  }
+
+  wdi_data <- wdi_data %>%
     filter(region != "Aggregates") %>%
+    filter(region %in% regions) %>%
+    filter(income %in% income_groups) %>%
+    tidyr::drop_na(dplyr::starts_with("ind_")) %>%
     mutate(is_highlight = country %in% highlight_countries) %>%
     mutate(highlighted_country = ifelse(is_highlight, country, NA)) %>%
     mutate(dplyr::across(
@@ -78,9 +88,9 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
     mutate(income = factor(income, levels = c(
       "Aggregates", "High income", "Upper middle income", "Lower middle income",
       "Low income", NA
-    ))) %>%
-    filter(region %in% regions) %>%
-    filter(income %in% income_groups)
+    )))
+
+  wdi_data
 }
 
 memoised_wdi <- memoise::memoise(
@@ -474,7 +484,7 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
                                country, regions, income_groups)
 
   wdi_data_wide <- wdi_data %>%
-    select(-region, -income, -highlight_ind_1) %>%
+    select(country, year, ind_1) %>%
     tidyr::pivot_wider(names_from = country, values_from = ind_1) %>%
     dplyr::arrange(year)
 
@@ -838,6 +848,227 @@ plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 }
 
 
-# TODO: bring the bubble plot, dynamic
+#' Animated bubble plot
+#'
+#' Scatter plot that let's you map the size of the markers to an indicator
+#'
+#' @inheritParams download_wdi_ind
+#' @param x_indicator code of indicator for the x axis
+#' @param y_indicator code of indicator for the y axis
+#' @param size_indicator code of indicator for the size of the markers
+#' @param p_x Transformation exponent for x-axis, as in scales::modulus_trans
+#' @param p_y Transformation exponent for y-axis, as in scales::modulus_trans
+#'
+#' @return a ggplot2 object
+#' @export
+#'
+#' @examples
+plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+                                   y_indicator = "SH.SGR.CRSK.ZS",
+                                   size_indicator = "SP.POP.TOTL",
+                                   highlight_countries = c("Colombia", "Germany"),
+                                   start = lubridate::year(Sys.Date()) - 10,
+                                   end = lubridate::year(Sys.Date()),
+                                   country = "all",
+                                   regions = wdiquickplots:::regions,
+                                   income_groups = wdiquickplots:::income_groups,
+                                   p_x = 1,
+                                   p_y = 1) {
+
+  # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
+
+  ind_1 <- ind_2 <- ind_3 <- alpha <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
+
+  wdi_data <- download_wdi_ind(
+    c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
+    end, country, regions, income_groups, interpolate = TRUE
+  )
+
+  wdi_data <- wdi_data %>%
+    mutate(alpha = case_when(is_highlight ~ 1, TRUE ~ 0.35))
+
+  ind_1_lab <- attr(wdi_data$ind_1, "label")
+  ind_2_lab <- attr(wdi_data$ind_2, "label")
+  ind_3_lab <- attr(wdi_data$ind_3, "label")
+
+  wdi_data %>%
+    ggplot() +
+    aes(x = ind_1, y = ind_2) +
+    geom_point(aes(size = ind_3, alpha = alpha, color = highlighted_country)) +
+    # not using ggrepel but geom_text because ggrepel looks unstable in the
+    # animation, but then we better turn off clipping
+    geom_text(
+      aes(label = case_when(is_highlight ~ paste(highlighted_country, interpolate))),
+      fontface = "bold", vjust = -1, hjust = 0.5
+    ) +
+    coord_cartesian(clip = "off") +
+    ggthemes::theme_tufte() +
+    scale_alpha(range = c(0.35, 1), guide = FALSE) +
+    scale_color_brewer(palette="Set2", na.value="grey70", guide = FALSE) +
+    scale_size(
+      name = ind_3_lab,
+      range = c(2, 20),
+      breaks = modulus_breaks(0, 4),
+      labels = get_formatter(wdi_data$ind_3)
+    ) +
+    scale_x_continuous(
+      name = attr(wdi_data$ind_1, "label"),
+      trans = scales::modulus_trans(p_x),
+      labels = get_formatter(wdi_data$ind_1),
+      breaks = modulus_breaks(p_x),
+      guide = guide_axis(check.overlap = TRUE)
+    ) +
+    scale_y_continuous(
+      name = attr(wdi_data$ind_2, "label"),
+      trans = scales::modulus_trans(p_y),
+      labels = get_formatter(wdi_data$ind_2),
+      breaks = modulus_breaks(p_y),
+      guide = guide_axis(check.overlap = TRUE)
+    ) +
+    # ggplot2::geom_smooth() + TODO: conditional?
+    theme(panel.border = element_rect(colour = "grey", fill = NA)) +
+    guides(size = guide_legend(override.aes = list(size=c(2, 4, 6, 8)))) +
+    theme(legend.position = "top") +
+    labs(caption = paste(
+      ifelse(p_x != 1, glue::glue("x-axis transformed scale modulus({p_x}) "), ""),
+      ifelse(p_y != 1, glue::glue("y-axis transformed scale modulus({p_y}) "), "")
+    )) +
+    labs(subtitle = 'Year: {frame_time}') +
+    gganimate::transition_time(year) +
+    gganimate::ease_aes('cubic-in-out')
+
+}
 
 
+
+
+#' Animated/dynamic bubble plot, interactive (powered by plotly)
+#'
+#' Scatter plot that let's you map the size of the markers to an indicator
+#'
+#' @inheritParams download_wdi_ind
+#' @param x_indicator code of indicator for the x axis
+#' @param y_indicator code of indicator for the y axis
+#' @param size_indicator code of indicator for the size of the markers
+#'
+#' @return a plotly object
+#' @export
+#'
+#' @examples
+plot_bubble_anime_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+                                   y_indicator = "SH.SGR.CRSK.ZS",
+                                   size_indicator = "SP.POP.TOTL",
+                                   highlight_countries = c("China", "Chile"),
+                                   start = lubridate::year(Sys.Date()) - 20,
+                                   end = lubridate::year(Sys.Date()),
+                                   country = "all",
+                                   regions = wdiquickplots:::regions,
+                                   income_groups = wdiquickplots:::income_groups) {
+
+  # TODO: format numbers
+  # TODO: allow modulus transformations, receiving p_x and p_y
+  # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
+
+  is_highlight <- NULL
+
+  wdi_data <- download_wdi_ind(
+    c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
+    end, country, regions, income_groups, interpolate = TRUE
+  )
+
+  highlight_data <- wdi_data %>%
+    filter(is_highlight)
+
+  ind_1_lab <- attr(wdi_data$ind_1, "label")
+  ind_2_lab <- attr(wdi_data$ind_2, "label")
+  ind_3_lab <- attr(wdi_data$ind_3, "label")
+
+  wdi_data %>%
+    plotly::plot_ly( # set common parameters for all traces
+      x = ~ind_1,
+      y = ~ind_2,
+      frame = ~year,
+      text = ~paste0(
+        "<b>", country, interpolate, "</b> (", year,")<br><br>",
+        ind_1_lab, ":<br>", get_formatter(wdi_data$ind_1)(ind_1), "<br><br>",
+        ind_2_lab, ":<br>", get_formatter(wdi_data$ind_2)(ind_2),"<br><br>",
+        ind_3_lab, ":<br>", get_formatter(wdi_data$ind_3)(ind_3)
+      )
+    ) %>%
+    plotly::add_markers( # add scatter plot markers
+      size = ~ind_3,
+      color = ~tidyr::replace_na(highlighted_country, "NA"),
+      marker = list(opacity = 0.25, sizemode = 'diameter'),
+      sizes = c(10, 50),
+      hoverinfo = 'text'
+    ) %>%
+    plotly::add_markers( # override the data and marker styling opacity = 1
+      data = highlight_data, # including only highlighted countries
+      size = ~ind_3,
+      color = ~tidyr::replace_na(highlighted_country, "NA"),
+      marker = list(opacity = 1, sizemode = 'diameter'),
+      sizes = c(10, 50),
+      hoverinfo = 'text'
+    ) %>%
+    plotly::add_text(
+      data = highlight_data, # including only highlighted countries
+      text = ~paste0("<b>", country, interpolate, "</b>"),
+      mode = 'text',
+      textposition = 'middle right'
+    ) %>%
+    plotly::layout(
+      showlegend = FALSE,
+      xaxis = list(title = ind_1_lab, showgrid = FALSE),
+      yaxis = list(title = ind_2_lab, showgrid = FALSE)
+    ) %>%
+    plotly::animation_opts(
+      1000, 1000, redraw = FALSE
+    )
+}
+
+
+get_char_code <- function(col_name) {
+
+  char_codes <- c("\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075")
+  col_index <- as.numeric(sub("ind_", "", col_name))
+  if (col_index > 5) {
+    "*"
+  } else {
+    char_codes[col_index]
+  }
+}
+
+interpolate_wdi <- function(wdi_data = download_wdi_ind(c("SH.XPD.GHED.GD.ZS", "SH.SGR.CRSK.ZS"))) {
+
+  interpolated_data <- wdi_data %>%
+    # most probably, there will be missing values in some countries for some years
+    # so here's a controversial decision to make the animation look good
+    # let's fill missing values for each country, by interpolating values in
+    # the gaps and filling with the first or last value available
+    tidyr::complete(country, year) %>% # now there could be NA in ind_i
+    mutate(across(
+      .cols = starts_with("ind_"),
+      .fns = ~ifelse(is.na(.x), get_char_code(dplyr::cur_column()), ""),
+      .names = "interpolate_{.col}"
+    )) %>%
+    tidyr::unite("interpolate", starts_with("interpolate_"), sep = "") %>%
+    group_by(country) %>%
+    arrange(country, year) %>%
+    mutate(dplyr::across( # here we are losing the labels
+      .cols = dplyr::starts_with("ind_"),
+      .fns = zoo::na.approx,
+      na.rm = FALSE
+    )) %>%
+    tidyr::fill(dplyr::starts_with("ind_"), .direction = "downup") %>%
+    ungroup()
+
+  # Need to get the labels back
+  for (col in names(wdi_data)) {
+    attr(interpolated_data[[col]], "label") <- attr(wdi_data[[col]], "label")
+  }
+
+  interpolated_data
+}
+
+# https://plotly-r.com/animating-views.html
+#https://xang1234.github.io/bubbleplot/

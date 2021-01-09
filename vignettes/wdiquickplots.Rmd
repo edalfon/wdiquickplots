@@ -109,7 +109,7 @@ plot_bubble_gg_wdi_ind(
   y_indicator = "SH.SGR.CRSK.ZS",
   size_indicator = "SP.POP.TOTL",
   highlight_countries = c("India", "Germany", "Brazil")
-) %>% plotly::ggplotly()
+)
 ```
 
 ## Interactive
@@ -130,7 +130,34 @@ plot_bubble_ly_wdi_ind(
 
 
 
+# Animated bubble plot
+
+And if you dare, you can throw one more dimension (time) to the bubble plot,
+and make it an animated plot.
 
 
+## Static
 
+Again, there is static version powered by `ggplot2` and `gganimate`.
 
+```{r bubble_anime_gg}
+plot_bubble_anime_gg_wdi_ind(
+  x_indicator = "SH.XPD.GHED.GD.ZS",
+  y_indicator = "SH.SGR.CRSK.ZS",
+  size_indicator = "SP.POP.TOTL",
+  highlight_countries = c("India", "Germany", "Brazil")
+)
+```
+
+## Interactive
+
+And a `plotly`-based version.
+
+```{r bubble_anime_ly}
+plot_bubble_anime_ly_wdi_ind(
+  x_indicator = "SH.XPD.GHED.GD.ZS",
+  y_indicator = "SH.SGR.CRSK.ZS",
+  size_indicator = "SP.POP.TOTL",
+  highlight_countries = c("India", "Germany", "Brazil")
+)
+```
