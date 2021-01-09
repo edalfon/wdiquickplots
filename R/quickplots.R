@@ -54,7 +54,6 @@ download_wdi <- function(indicator = "NY.GDP.PCAP.KD",
   wdi_data <- wdi_raw %>%
     select(country, year, region, income, dplyr::starts_with("ind_"))
 
-  # TODO: perhaps let interpolate before or after removing NAs
   if (isTRUE(interpolate)) {
     wdi_data <- interpolate_wdi(wdi_data)
   }
@@ -146,7 +145,7 @@ plot_dist_wdi_ggpdef <- function(wdi_data, ind, facets, country, highlight,
 
   the_plot <- ggplot(aes(x = {{ ind }}, fill = {{ facets }}), data = wdi_data) +
     facet_wrap(vars({{ facets }}), ncol = 1, scales = "free_y") +
-    geom_density(alpha = 0.7, color = NA, adjust = 0.25) + # TODO: bw per facet
+    geom_density(alpha = 0.7, color = NA, adjust = 0.25) +
     geom_rug() +
     geom_vline(aes(xintercept = {{ highlight }}), linetype = "dotted") +
     ggrepel::geom_text_repel(
@@ -288,17 +287,20 @@ plot_bar_wdi <- function(indicator = "NY.GDP.PCAP.KD",
 
   ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi(indicator, highlight_countries, start, end,
-                             country, regions, income_groups)
+  wdi_data <- latest_wdi(indicator, highlight_countries, start, end, country,
+                         regions, income_groups)
+
+  all_years <- vctrs::vec_count(wdi_data$year)$key
+
+  custom_formatter <- get_formatter(wdi_data$ind_1)
 
   wdi_data <- wdi_data %>%
     mutate(text = dplyr::case_when(
-      !is.na(highlight_ind_1) ~ paste0(country, " [", scales::comma(highlight_ind_1), "]")
+      is_highlight ~ paste0("<b>", country, " [",
+                            custom_formatter(highlight_ind_1), "]</b>")
     )) %>%
-    mutate(color = dplyr::case_when(!is.na(highlight_ind_1) ~ highlight_color,
+    mutate(color = dplyr::case_when(is_highlight ~ highlight_color,
                                     TRUE ~ base_color))
-
-  all_years <- vctrs::vec_count(wdi_data$year)$key
 
   plotly::plot_ly(
     data = wdi_data,
@@ -307,9 +309,9 @@ plot_bar_wdi <- function(indicator = "NY.GDP.PCAP.KD",
     text = ~text,
     textposition = 'outside',
     textfont = list(face = "bold", color = '#000000', size = 14),
-    hovertemplate = paste('%{y}<br>%{x:,.0f}<br>'), # TODO: customize scale
+    hovertemplate = ~paste0(country, "<br>", custom_formatter(ind_1)),
     # https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format
-    type = 'bar',
+    type = "bar",
     orientation = 'v',
     marker = list(color = ~color)
   ) %>%
@@ -519,8 +521,6 @@ plot_race_wdi <- function(indicator = "SI.POV.GINI",
                               income_groups = default_income_groups(),
                               p = 1) {
 
-  # TODO: allow transformation passing p as in otherss
-
   year <- ind_1 <- highlight_ind_1 <- region <- income <- highlight_country <-
     highlight_country_label <- highlight_dummy <- ind_1_fill <- NULL
 
@@ -643,7 +643,6 @@ plot_bubble_ly_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    regions = default_regions(),
                                    income_groups = default_income_groups()) {
 
-  # TODO: format numbers
   # TODO: allow modulus transformations, receiving p_x and p_y
   # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
 
@@ -914,7 +913,6 @@ plot_bubble_anime_ly_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    regions = default_regions(),
                                    income_groups = default_income_groups()) {
 
-  # TODO: format numbers
   # TODO: allow modulus transformations, receiving p_x and p_y
   # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
 
@@ -1104,11 +1102,29 @@ modulus_breaks <- function(p_custom, n.breaks_default = 10) {
   }
 }
 
-# TODO: improve it, to better display decimals when necesary and %
+#' Create custom formatter for indicators, based on the data and label
+#'
+#' @param plot_data indicator data, including label
+#'
+#' @return a formatter function from the scales package
 get_formatter <- function(plot_data) {
-  if (all(plot_data >= 0 & plot_data <= 1)) {
-    return(scales::percent_format(accuracy = 1))
+
+  ind_label <- attr(plot_data, "label")
+  ind_min <- min(plot_data, na.rm = TRUE)
+  ind_max <- max(plot_data, na.rm = TRUE)
+
+  if (grepl("\\(.*%.*)", ind_label)) {
+    return(scales::percent_format(accuracy = 0.1, scale = 1))
   }
+
+  if (ind_max - ind_min < 200) { # arbitrary
+    return(scales::comma_format(accuracy = 0.1))
+  }
+
+  if (ind_max - ind_min < 1) { # arbitrary
+    return(scales::comma_format(accuracy = 0.01))
+  }
+
   return(scales::comma_format(accuracy = 1))
 }
 
