@@ -129,7 +129,7 @@ certainly do, but it is boring. So let's put some plots in there.
 
 ```{r dist, fig.asp=870/550, fig.width=4.5, out.width="47%", dev="svg"}
 library(wdiquickplots)
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
+plot_dist_wdi("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
 There you go. That's the spirit of this package. One line of code and bang!, 

@@ -7,7 +7,7 @@
 interpolate_wdi(wdi_data)
 }
 \arguments{
-\item{wdi_data}{dataset to interpolate, as returned by download_wdi_ind}
+\item{wdi_data}{dataset to interpolate, as returned by download_wdi}
 }
 \value{
 a data.frame with interpolated values and additional column

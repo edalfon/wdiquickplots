@@ -1,29 +1,3 @@
-
-#' Default regions, just to avoid repeating so many lines in all functions
-default_regions <- function() {
-  c(
-    "Middle East & North Africa",
-    "Europe & Central Asia",
-    "Sub-Saharan Africa",
-    "Latin America & Caribbean",
-    "East Asia & Pacific",
-    "South Asia",
-    "North America"
-  )
-}
-
-#' Default income groups, just to avoid repeating so many lines in all functions
-default_income_groups <- function() {
-  c(
-    "Aggregates",
-    "High income",
-    "Upper middle income",
-    "Lower middle income",
-    "Low income"
-  )
-}
-
-
 #' Download WDI data and prepare the dataset for the plots
 #'
 #' Download data using a memoised version of WDI::WDI() and wrangle a bit
@@ -51,13 +25,13 @@ default_income_groups <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' download_wdi_ind("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
+#' download_wdi("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
 #' }
 #'
-download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+download_wdi <- function(indicator = "NY.GDP.PCAP.KD",
                              highlight_countries = c(""),
                              start = lubridate::year(Sys.Date()) - 10,
-                             end = lubridate::year(Sys.Date()),
+                             end = lubridate::year(Sys.Date() - months(18)),
                              country = "all",
                              regions = default_regions(),
                              income_groups = default_income_groups(),
@@ -111,9 +85,9 @@ memoised_wdi <- memoise::memoise(
 )
 
 
-#' Get latest data for a single indicator per country
+#' Get latest data per country
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #'
 #' @return data.frame with columns country, year, ind_1, region, income,
 #'         highlight_ind_1. highlight_ind_1 = NA, except for highlight
@@ -124,20 +98,21 @@ memoised_wdi <- memoise::memoise(
 #'
 #' @examples
 #' \dontrun{
-#' latest_wdi_ind("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
+#' latest_wdi("NY.GDP.PCAP.KD", c("Colombia", "Germany"))
+#' latest_wdi("NY.GDP.PCAP.KD", c("Colombia", "Germany"), 2019, 2019)
 #' }
 #'
-latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+latest_wdi <- function(indicator = "NY.GDP.PCAP.KD",
                            highlight_countries = c(""),
                            start = lubridate::year(Sys.Date()) - 10,
-                           end = lubridate::year(Sys.Date()),
+                           end = lubridate::year(Sys.Date() - months(18)),
                            country = "all",
                            regions = default_regions(),
                            income_groups = default_income_groups()) {
 
   year <- NULL # or use the .data pronoun
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- download_wdi(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   wdi_data %>%
@@ -148,7 +123,7 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
 #' Plot a WDI indicator
 #'
-#' @param wdi_data data.frame as returned by latest_wdi_ind
+#' @param wdi_data data.frame as returned by latest_wdi
 #' @param ind variable in wdi_data to plot
 #' @param facets variable in wdi_data to use as facets (either region or income)
 #' @param country variable in wdi_data to use as country names
@@ -159,13 +134,7 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' @return a ggplot2 object
 #'
 #' @noRd
-#'
-#' @examples
-#' \dontrun{
-#' wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end, country)
-#' plot_dist_wdi_ind_ggpdef(wdi_data, ind_1, {{ facets }}, country, highlight, p)
-#' }
-plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
+plot_dist_wdi_ggpdef <- function(wdi_data, ind, facets, country, highlight,
                                      year, p = 1) {
 
   # wdi_data <- wdi_data %>%
@@ -256,7 +225,7 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
 #' downloading the data as necessary for the period indicated by start and end,
 #' and keeping only the latest data point available for each country
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param facets whether to show facets per region or income
 #' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
 #'
@@ -265,13 +234,13 @@ plot_dist_wdi_ind_ggpdef <- function(wdi_data, ind, facets, country, highlight,
 #'
 #' @examples
 #' \dontrun{
-#' plot_dist_wdi_ind()
+#' plot_dist_wdi()
 #' }
-plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+plot_dist_wdi <- function(indicator = "NY.GDP.PCAP.KD",
                               highlight_countries = c("Colombia", "Germany"),
                               facets = region,
                               start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
+                              end = lubridate::year(Sys.Date() - months(18)),
                               country = "all",
                               regions = default_regions(),
                               income_groups = default_income_groups(),
@@ -279,16 +248,16 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
   ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- latest_wdi(indicator, highlight_countries, start, end,
                              country, regions, income_groups)
 
-  plot_dist_wdi_ind_ggpdef(wdi_data, ind_1, {{ facets }}, country, highlight_ind_1,
+  plot_dist_wdi_ggpdef(wdi_data, ind_1, {{ facets }}, country, highlight_ind_1,
                            year, p)
 }
 
 #' Plot a WDI indicator as an interactive bar-plot (powered by plotly)
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param base_color fill color for the bars for most countries
 #' @param highlight_color fill color for the bars for highlighted countries
 #'
@@ -297,12 +266,12 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #'
 #' @examples
 #' \dontrun{
-#' plot_bar_wdi_ind()
+#' plot_bar_wdi()
 #' }
-plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
+plot_bar_wdi <- function(indicator = "NY.GDP.PCAP.KD",
                              highlight_countries = c("Colombia", "Germany"),
                              start = lubridate::year(Sys.Date()) - 10,
-                             end = lubridate::year(Sys.Date()),
+                             end = lubridate::year(Sys.Date() - months(18)),
                              country = "all",
                              regions = default_regions(),
                              income_groups = default_income_groups(),
@@ -319,7 +288,7 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 
   ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- latest_wdi(indicator, highlight_countries, start, end,
                              country, regions, income_groups)
 
   wdi_data <- wdi_data %>%
@@ -364,7 +333,7 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' We use the super cool gghighlight::gghighlight package to disentangle the
 #' spaghetti plot and highlight selected countries in each facet
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param facets variable to use for facets. Either region or income
 #' @param p Transformation exponent, <U+03BB>, as in scales::modulus_trans
 #'
@@ -372,11 +341,14 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
 #' @export
 #'
 #' @examples
-plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
+#' \dontrun{
+#' plot_time_facets_wdi()
+#' }
+plot_time_facets_wdi <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
                               facets = region,
                               start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
+                              end = lubridate::year(Sys.Date() - months(18)),
                               country = "all",
                               regions = default_regions(),
                               income_groups = default_income_groups(),
@@ -384,7 +356,7 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   region <- year <- ind_1 <- highlight_ind_1 <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- download_wdi(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   ggplot(aes(x = year, y = ind_1, color = country), data = wdi_data) +
@@ -416,16 +388,19 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
 #' Line plot (plotly-powered) the indicator over time (year) for the
 #' highlight_countries only
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #'
 #' @return plotly object
 #' @export
 #'
 #' @examples
-plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
+#' \dontrun{
+#' plot_time_wdi()
+#' }
+plot_time_wdi <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
                               start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
+                              end = lubridate::year(Sys.Date() - months(18)),
                               country = "all",
                               regions = default_regions(),
                               income_groups = default_income_groups()) {
@@ -435,7 +410,7 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
   year <- ind_1 <- highlight_ind_1 <- NULL
 
   # TODO: here you could actually download only the highlight countries
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- download_wdi(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   custom_formatter <- get_formatter(wdi_data$ind_1)
@@ -474,16 +449,19 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
 
 #' Spaghetti plot that no-one really want to see (nor should want to see, ever)
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #'
 #' @return a dygraphs plot
 #' @export
 #'
 #' @examples
-plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
+#' \dontrun{
+#' plot_spaghetti_wdi()
+#' }
+plot_spaghetti_wdi <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
                               start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
+                              end = lubridate::year(Sys.Date() - months(18)),
                               country = "all",
                               regions = default_regions(),
                               income_groups = default_income_groups()) {
@@ -492,7 +470,7 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
 
   year <- ind_1 <- highlight_ind_1 <- region <- income <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- download_wdi(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   wdi_data_wide <- wdi_data %>%
@@ -522,17 +500,20 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
 
 #' Race bar plot
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param p transformation exponent, as in scales::modulus_trans
 #'
 #' @return gganimate
 #' @export
 #'
 #' @examples
-plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
+#' \dontrun{
+#' plot_race_wdi()
+#' }
+plot_race_wdi <- function(indicator = "SI.POV.GINI",
                               highlight_countries = c("Colombia", "Germany"),
-                              start = lubridate::year(Sys.Date()) - 10,
-                              end = lubridate::year(Sys.Date()),
+                              start = lubridate::year(Sys.Date()) - 15,
+                              end = lubridate::year(Sys.Date() - months(18)),
                               country = "all",
                               regions = default_regions(),
                               income_groups = default_income_groups(),
@@ -543,7 +524,7 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
   year <- ind_1 <- highlight_ind_1 <- region <- income <- highlight_country <-
     highlight_country_label <- highlight_dummy <- ind_1_fill <- NULL
 
-  wdi_data <- download_wdi_ind(indicator, highlight_countries, start, end,
+  wdi_data <- download_wdi(indicator, highlight_countries, start, end,
                                country, regions, income_groups)
 
   custom_formatter <- get_formatter(wdi_data$ind_1)
@@ -636,68 +617,11 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
   # )
 }
 
-
-
-#' Modulus breaks factory
-#'
-#' This function tries to replicate/approximate the nice functionality of
-#' log-transformation (`scales` package to be used for `ggplot2` plots, using
-#' for example ggplot2::scale_x_log10()). that automatically shows breaks values
-#' in the original scale, even though the axis is on a transformed scale.
-#' Unfortunately, that is not the default behaviour of other transformations,
-#' and the modulus transformation in particular.
-#'
-#' This function does not aim for a clever algorithm. Rather it just calculates
-#' optimal breaks (labeling::extended) on the original and transformed scales,
-#' and combine them, expressing all in the original scale
-#'
-#' Take a look at scales::log_breaks and ?scales::log_trans
-#'
-#' @param p_custom p transformation exponent, as in scales::modulus_trans
-#' @param n.breaks_default number of breaks
-#'
-#' @return numeric vector with the breaks
-modulus_breaks <- function(p_custom, n.breaks_default = 10) {
-
-  function(limits, p = p_custom, n.breaks = n.breaks_default) {
-    # you get the limits in the original scale, so let's transform them to
-    # calculate the breaks on the transformed scale
-    limits_trans <- scales::modulus_trans(p)$transform(limits)
-    breaks_trans <- labeling::extended(
-      dmin = min(limits_trans),
-      dmax = max(limits_trans),
-      m = n.breaks,
-      Q = scales::modulus_trans(p)$transform(c(1, 5, 2, 2.5, 4, 3))
-    )
-    # But apply the inverse to express the breaks on the original scale
-    # breaks calculated on the original  scale are already pretty, but the
-    # breaks calculated on the transformed scale are not (more precisely, they
-    # are only pretty on the transformed scale, but we want them in the end on
-    # the original scale)
-    breaks_trans <- scales::modulus_trans(p)$inverse(breaks_trans)
-    breaks_trans <- purrr::map_dbl(breaks_trans, ~ pretty(.x, n = 1)[which.min(abs(pretty(.x, n = 1) - .x))])
-    # And also calculate breaks on the original scale
-    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
-    # ANd finally put them together
-    breaks_combined <- unique(sort(c(breaks_trans, breaks_notrans)))
-    #breaks_final <- purrr::map_dbl(breaks_combined, ~ dplyr::first(pretty(.x, n = 1)))
-    breaks_combined
-  }
-}
-
-# TODO: improve it, to better display decimals when necesary and %
-get_formatter <- function(plot_data) {
-  if (all(plot_data >= 0 & plot_data <= 1)) {
-    return(scales::percent_format(accuracy = 1))
-  }
-  return(scales::comma_format(accuracy = 1))
-}
-
 #' Bubble plot, interactive (powered by plotly)
 #'
 #' Scatter plot that let's you map the size of the markers to an indicator
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param x_indicator code of indicator for the x axis
 #' @param y_indicator code of indicator for the y axis
 #' @param size_indicator code of indicator for the size of the markers
@@ -706,12 +630,15 @@ get_formatter <- function(plot_data) {
 #' @export
 #'
 #' @examples
-plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+#' \dontrun{
+#' plot_bubble_ly_wdi()
+#' }
+plot_bubble_ly_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    y_indicator = "SH.SGR.CRSK.ZS",
                                    size_indicator = "SP.POP.TOTL",
                                    highlight_countries = c("Colombia", "Germany"),
                                    start = lubridate::year(Sys.Date()) - 10,
-                                   end = lubridate::year(Sys.Date()),
+                                   end = lubridate::year(Sys.Date() - months(18)),
                                    country = "all",
                                    regions = default_regions(),
                                    income_groups = default_income_groups()) {
@@ -722,7 +649,7 @@ plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 
   is_highlight <- NULL
 
-  wdi_data <- latest_wdi_ind(
+  wdi_data <- latest_wdi(
     c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
     end, country, regions, income_groups
   )
@@ -778,7 +705,7 @@ plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #'
 #' Scatter plot that let's you map the size of the markers to an indicator
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param x_indicator code of indicator for the x axis
 #' @param y_indicator code of indicator for the y axis
 #' @param size_indicator code of indicator for the size of the markers
@@ -789,12 +716,15 @@ plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #' @export
 #'
 #' @examples
-plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+#' \dontrun{
+#' plot_bubble_gg_wdi()
+#' }
+plot_bubble_gg_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    y_indicator = "SH.SGR.CRSK.ZS",
                                    size_indicator = "SP.POP.TOTL",
                                    highlight_countries = c("Colombia", "Germany"),
                                    start = lubridate::year(Sys.Date()) - 10,
-                                   end = lubridate::year(Sys.Date()),
+                                   end = lubridate::year(Sys.Date() - months(18)),
                                    country = "all",
                                    regions = default_regions(),
                                    income_groups = default_income_groups(),
@@ -805,7 +735,7 @@ plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 
   ind_1 <- ind_2 <- ind_3 <- alpha <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
 
-  wdi_data <- latest_wdi_ind(
+  wdi_data <- latest_wdi(
     c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
     end, country, regions, income_groups
   )
@@ -865,7 +795,7 @@ plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #'
 #' Scatter plot that let's you map the size of the markers to an indicator
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param x_indicator code of indicator for the x axis
 #' @param y_indicator code of indicator for the y axis
 #' @param size_indicator code of indicator for the size of the markers
@@ -876,12 +806,15 @@ plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #' @export
 #'
 #' @examples
-plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+#' \dontrun{
+#' plot_bubble_anime_gg_wdi()
+#' }
+plot_bubble_anime_gg_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    y_indicator = "SH.SGR.CRSK.ZS",
                                    size_indicator = "SP.POP.TOTL",
                                    highlight_countries = c("Colombia", "Germany"),
-                                   start = lubridate::year(Sys.Date()) - 10,
-                                   end = lubridate::year(Sys.Date()),
+                                   start = lubridate::year(Sys.Date()) - 20,
+                                   end = lubridate::year(Sys.Date() - months(18)),
                                    country = "all",
                                    regions = default_regions(),
                                    income_groups = default_income_groups(),
@@ -892,7 +825,7 @@ plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 
   ind_1 <- ind_2 <- ind_3 <- alpha <- year <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
 
-  wdi_data <- download_wdi_ind(
+  wdi_data <- download_wdi(
     c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
     end, country, regions, income_groups, interpolate = TRUE
   )
@@ -959,7 +892,7 @@ plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #'
 #' Scatter plot that let's you map the size of the markers to an indicator
 #'
-#' @inheritParams download_wdi_ind
+#' @inheritParams download_wdi
 #' @param x_indicator code of indicator for the x axis
 #' @param y_indicator code of indicator for the y axis
 #' @param size_indicator code of indicator for the size of the markers
@@ -968,12 +901,15 @@ plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #' @export
 #'
 #' @examples
-plot_bubble_anime_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
+#' \dontrun{
+#' plot_bubble_anime_ly_wdi()
+#' }
+plot_bubble_anime_ly_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    y_indicator = "SH.SGR.CRSK.ZS",
                                    size_indicator = "SP.POP.TOTL",
                                    highlight_countries = c("China", "Chile"),
                                    start = lubridate::year(Sys.Date()) - 20,
-                                   end = lubridate::year(Sys.Date()),
+                                   end = lubridate::year(Sys.Date() - months(18)),
                                    country = "all",
                                    regions = default_regions(),
                                    income_groups = default_income_groups()) {
@@ -984,7 +920,7 @@ plot_bubble_anime_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 
   is_highlight <- NULL
 
-  wdi_data <- download_wdi_ind(
+  wdi_data <- download_wdi(
     c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
     end, country, regions, income_groups, interpolate = TRUE
   )
@@ -1062,7 +998,7 @@ get_char_code <- function(col_name) {
 #' fill missing values for each country, by interpolating values in the gaps and
 #' filling with the first or last value available
 #'
-#' @param wdi_data dataset to interpolate, as returned by download_wdi_ind
+#' @param wdi_data dataset to interpolate, as returned by download_wdi
 #'
 #' @return a data.frame with interpolated values and additional column
 #'         indicating which indicators, for which year and country were
@@ -1097,5 +1033,86 @@ interpolate_wdi <- function(wdi_data) {
   interpolated_data
 }
 
+#' Default regions, just to avoid repeating so many lines in all functions
+default_regions <- function() {
+  c(
+    "Middle East & North Africa",
+    "Europe & Central Asia",
+    "Sub-Saharan Africa",
+    "Latin America & Caribbean",
+    "East Asia & Pacific",
+    "South Asia",
+    "North America"
+  )
+}
+
+#' Default income groups, just to avoid repeating so many lines in all functions
+default_income_groups <- function() {
+  c(
+    "Aggregates",
+    "High income",
+    "Upper middle income",
+    "Lower middle income",
+    "Low income"
+  )
+}
+
+#' Modulus breaks factory
+#'
+#' This function tries to replicate/approximate the nice functionality of
+#' log-transformation (`scales` package to be used for `ggplot2` plots, using
+#' for example ggplot2::scale_x_log10()). that automatically shows breaks values
+#' in the original scale, even though the axis is on a transformed scale.
+#' Unfortunately, that is not the default behaviour of other transformations,
+#' and the modulus transformation in particular.
+#'
+#' This function does not aim for a clever algorithm. Rather it just calculates
+#' optimal breaks (labeling::extended) on the original and transformed scales,
+#' and combine them, expressing all in the original scale
+#'
+#' Take a look at scales::log_breaks and ?scales::log_trans
+#'
+#' @param p_custom p transformation exponent, as in scales::modulus_trans
+#' @param n.breaks_default number of breaks
+#'
+#' @return numeric vector with the breaks
+modulus_breaks <- function(p_custom, n.breaks_default = 10) {
+
+  function(limits, p = p_custom, n.breaks = n.breaks_default) {
+    # you get the limits in the original scale, so let's transform them to
+    # calculate the breaks on the transformed scale
+    limits_trans <- scales::modulus_trans(p)$transform(limits)
+    breaks_trans <- labeling::extended(
+      dmin = min(limits_trans),
+      dmax = max(limits_trans),
+      m = n.breaks,
+      Q = scales::modulus_trans(p)$transform(c(1, 5, 2, 2.5, 4, 3))
+    )
+    # But apply the inverse to express the breaks on the original scale
+    # breaks calculated on the original  scale are already pretty, but the
+    # breaks calculated on the transformed scale are not (more precisely, they
+    # are only pretty on the transformed scale, but we want them in the end on
+    # the original scale)
+    breaks_trans <- scales::modulus_trans(p)$inverse(breaks_trans)
+    breaks_trans <- purrr::map_dbl(breaks_trans, ~ pretty(.x, n = 1)[which.min(abs(pretty(.x, n = 1) - .x))])
+    # And also calculate breaks on the original scale
+    breaks_notrans <- labeling::extended(min(limits), max(limits), n.breaks)
+    # ANd finally put them together
+    breaks_combined <- unique(sort(c(breaks_trans, breaks_notrans)))
+    #breaks_final <- purrr::map_dbl(breaks_combined, ~ dplyr::first(pretty(.x, n = 1)))
+    breaks_combined
+  }
+}
+
+# TODO: improve it, to better display decimals when necesary and %
+get_formatter <- function(plot_data) {
+  if (all(plot_data >= 0 & plot_data <= 1)) {
+    return(scales::percent_format(accuracy = 1))
+  }
+  return(scales::comma_format(accuracy = 1))
+}
+
+
 # https://plotly-r.com/animating-views.html
-#https://xang1234.github.io/bubbleplot/
+# https://xang1234.github.io/bubbleplot/
+

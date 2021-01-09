@@ -3,10 +3,10 @@ test_that("multiplication works", {
 })
 
 
-test_that("download_wdi_ind works", {
+test_that("download_wdi works", {
 
   expect_named(
-    download_wdi_ind("NY.GDP.PCAP.KD"),
+    download_wdi("NY.GDP.PCAP.KD"),
     c("country", "year", "region", "income",
       "is_highlight", "highlighted_country",
       "ind_1", "highlight_ind_1"
@@ -15,7 +15,7 @@ test_that("download_wdi_ind works", {
   )
 
   expect_named(
-    download_wdi_ind(c("NY.GDP.PCAP.KD", "SI.POV.GINI")),
+    download_wdi(c("NY.GDP.PCAP.KD", "SI.POV.GINI")),
     c("country", "year", "region", "income",
       "is_highlight", "highlighted_country",
       "ind_1", "ind_2",
@@ -24,7 +24,7 @@ test_that("download_wdi_ind works", {
   )
 
   testthat::expect_gt(
-    nrow(download_wdi_ind("NY.GDP.PCAP.KD")),
+    nrow(download_wdi("NY.GDP.PCAP.KD")),
     0
   )
 

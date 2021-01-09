@@ -38,8 +38,8 @@ by geographical regions or income groups. Simply pass unquoted `region` or
 `income` to the `facets` argument.
 
 ```{r dist, fig.asp=870/550, fig.width=6, out.width="45%", dev="svg", fig.ext = "svg", fig.align = "default"}
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = income, p = 0)
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", facets = region, p = 0)
+plot_dist_wdi("NY.GDP.PCAP.PP.CD", facets = income, p = 0)
+plot_dist_wdi("NY.GDP.PCAP.PP.CD", facets = region, p = 0)
 ```
 
 ## Subsetting the data
@@ -57,7 +57,7 @@ three arguments for this:
   Bank's income classification. `wdiquickplots:::income`
 
 ```{r dist_subset, fig.asp=0.7, fig.width=7, out.width="77%", dev="svg", fig.ext = "svg"}
-plot_dist_wdi_ind(
+plot_dist_wdi(
   indicator = "NY.GDP.PCAP.PP.CD", facets = region, p = 0, 
   regions = c("Europe & Central Asia", "Latin America & Caribbean")
 )
@@ -105,7 +105,7 @@ would say a couple of things:
 
 Main features have been described already in this site. And some of the plots
 allow for some more customization. But not much really. For example, the bar 
-plot allows the user to customize the colors (see `?plot_bar_wdi_ind`) but you 
+plot allows the user to customize the colors (see `?plot_bar_wdi`) but you 
 cannot turn it into a lollipop plot. In addition, you get the plot objects 
 prepared by `wdiquickplots` (e.g. `ggplot2` object) and you can go wild (e.g.
 override `scale_fill_brewer` to change color palette, you can even remove or

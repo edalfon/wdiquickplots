@@ -33,7 +33,7 @@ there.
 
 ``` r
 library(wdiquickplots)
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
+plot_dist_wdi("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
 <img src="man/figures/README-dist-1.svg" width="47%" style="display: block; margin: auto;" />

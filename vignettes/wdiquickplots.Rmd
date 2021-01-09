@@ -31,7 +31,7 @@ A plot to quickly compare highlighted countries, among them, and with the
 rest of the world using either region or income, to group countries.
 
 ```{r dist_gini, fig.asp=870/550, fig.width=6, out.width="47%", dev="svg", fig.ext="svg"}
-plot_dist_wdi_ind("NY.GDP.PCAP.PP.CD", p = 0)
+plot_dist_wdi("NY.GDP.PCAP.PP.CD", p = 0)
 ```
 
 
@@ -43,7 +43,7 @@ groups). This one is interactive so you can explore a bit (e.g. zooming in and
 out or see the exact value of the indicator for each country as tooltip).
 
 ```{r barplot}
-plot_bar_wdi_ind("NY.GDP.PCAP.PP.CD")
+plot_bar_wdi("NY.GDP.PCAP.PP.CD")
 ```
 
 # Race bar plot
@@ -52,7 +52,7 @@ Takes the same approach as the bar plot above, but showing also how it changes
 over time (powered by `gganimate`).
 
 ```{r race, out.width="40%", fig.asp=550/350, fig.width=5, cache=FALSE}
-plot_race_wdi_ind("NY.GDP.PCAP.PP.CD")
+plot_race_wdi("NY.GDP.PCAP.PP.CD")
 ```
 
 
@@ -63,7 +63,7 @@ directly the first and last value for each country and labels the series
 directly (it is an interactive plot as well).
 
 ```{r lineplot}
-plot_time_wdi_ind("NY.GDP.PCAP.PP.CD")
+plot_time_wdi("NY.GDP.PCAP.PP.CD")
 ```
 
 
@@ -73,7 +73,7 @@ Also a line plot as above, but including data for all countries.
 It is powered by `gghighlight` to disentangle the spaghetti plot.
 
 ```{r time_facets, dev="svg", fig.ext="svg"}
-plot_time_facets_wdi_ind("NY.GDP.PCAP.PP.CD")
+plot_time_facets_wdi("NY.GDP.PCAP.PP.CD")
 ```
 
 # Spaghetti plot
@@ -87,7 +87,7 @@ make such a spaghetti plot useful to identify eye-catching patterns.
 
 
 ```{r spaghetti}
-plot_spaghetti_wdi_ind("NY.GDP.PCAP.PP.CD")
+plot_spaghetti_wdi("NY.GDP.PCAP.PP.CD")
 ```
 
 # Bubble plot
@@ -104,7 +104,7 @@ health expenditure.
 There is a static version, powered by `ggplot2`.
 
 ```{r bubble_gg, dev="svg", fig.ext="svg"}
-plot_bubble_gg_wdi_ind(
+plot_bubble_gg_wdi(
   x_indicator = "SH.XPD.GHED.GD.ZS",
   y_indicator = "SH.SGR.CRSK.ZS",
   size_indicator = "SP.POP.TOTL",
@@ -120,7 +120,7 @@ a few things that could be better. Thus, there is also an interactive version,
 powered by `plotly`.
 
 ```{r bubble_ly}
-plot_bubble_ly_wdi_ind(
+plot_bubble_ly_wdi(
   x_indicator = "SH.XPD.GHED.GD.ZS",
   y_indicator = "SH.SGR.CRSK.ZS",
   size_indicator = "SP.POP.TOTL",
@@ -141,7 +141,7 @@ and make it an animated plot.
 Again, there is static version powered by `ggplot2` and `gganimate`.
 
 ```{r bubble_anime_gg}
-plot_bubble_anime_gg_wdi_ind(
+plot_bubble_anime_gg_wdi(
   x_indicator = "SH.XPD.GHED.GD.ZS",
   y_indicator = "SH.SGR.CRSK.ZS",
   size_indicator = "SP.POP.TOTL",
@@ -154,7 +154,7 @@ plot_bubble_anime_gg_wdi_ind(
 And a `plotly`-based version.
 
 ```{r bubble_anime_ly}
-plot_bubble_anime_ly_wdi_ind(
+plot_bubble_anime_ly_wdi(
   x_indicator = "SH.XPD.GHED.GD.ZS",
   y_indicator = "SH.SGR.CRSK.ZS",
   size_indicator = "SP.POP.TOTL",
