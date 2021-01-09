@@ -12,8 +12,8 @@ plot_bubble_gg_wdi_ind(
   start = lubridate::year(Sys.Date()) - 10,
   end = lubridate::year(Sys.Date()),
   country = "all",
-  regions = wdiquickplots:::regions,
-  income_groups = wdiquickplots:::income_groups,
+  regions = default_regions(),
+  income_groups = default_income_groups(),
   p_x = 1,
   p_y = 1
 )
@@ -38,7 +38,7 @@ This argument is passed as is to WDI::WDI and hence, requires
 \item{regions}{character vector to filter the data only to specific regions}
 
 \item{income_groups}{character vector to filter the data only to specific
-sincome groups}
+income groups}
 
 \item{p_x}{Transformation exponent for x-axis, as in scales::modulus_trans}
 

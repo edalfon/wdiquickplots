@@ -1,22 +1,33 @@
-regions <- c(
-  "Middle East & North Africa",
-  "Europe & Central Asia",
-  "Sub-Saharan Africa",
-  "Latin America & Caribbean",
-  "East Asia & Pacific",
-  "South Asia",
-  "North America"
-)
 
-income_groups <- c(
-  "Aggregates",
-  "High income",
-  "Upper middle income",
-  "Lower middle income",
-  "Low income"
-)
+#' Default regions, just to avoid repeating so many lines in all functions
+default_regions <- function() {
+  c(
+    "Middle East & North Africa",
+    "Europe & Central Asia",
+    "Sub-Saharan Africa",
+    "Latin America & Caribbean",
+    "East Asia & Pacific",
+    "South Asia",
+    "North America"
+  )
+}
 
-#' Wrapper around WDI::WDI() to download data for a single indicator
+#' Default income groups, just to avoid repeating so many lines in all functions
+default_income_groups <- function() {
+  c(
+    "Aggregates",
+    "High income",
+    "Upper middle income",
+    "Lower middle income",
+    "Low income"
+  )
+}
+
+
+#' Download WDI data and prepare the dataset for the plots
+#'
+#' Download data using a memoised version of WDI::WDI() and wrangle a bit
+#' with the data to prepare a data.frame for the plots#'
 #'
 #' @param indicator character of length 1 with the indicator code
 #' @param highlight_countries character vector with country names to highlight
@@ -27,7 +38,8 @@ income_groups <- c(
 #'                'ISO-2 character codes, e.g. "BR", "US", "CA"'.
 #' @param regions character vector to filter the data only to specific regions
 #' @param income_groups character vector to filter the data only to specific
-#'                      sincome groups
+#'                      income groups
+#' @param interpolate boolean to indicate whether to interpolate missing values
 #'
 #' @return data.frame with columns country, year, ind_1, region, income,
 #'         highlight_ind_1. highlight_ind_1 = NA, except for highlight
@@ -47,8 +59,8 @@ download_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              start = lubridate::year(Sys.Date()) - 10,
                              end = lubridate::year(Sys.Date()),
                              country = "all",
-                             regions = wdiquickplots:::regions,
-                             income_groups = wdiquickplots:::income_groups,
+                             regions = default_regions(),
+                             income_groups = default_income_groups(),
                              interpolate = FALSE) {
 
   year <- ind_1 <- region <- income <- is_highlight <- NULL # or use the .data pronoun
@@ -120,8 +132,8 @@ latest_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                            start = lubridate::year(Sys.Date()) - 10,
                            end = lubridate::year(Sys.Date()),
                            country = "all",
-                           regions = wdiquickplots:::regions,
-                           income_groups = wdiquickplots:::income_groups) {
+                           regions = default_regions(),
+                           income_groups = default_income_groups()) {
 
   year <- NULL # or use the .data pronoun
 
@@ -261,8 +273,8 @@ plot_dist_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots:::regions,
-                              income_groups = wdiquickplots:::income_groups,
+                              regions = default_regions(),
+                              income_groups = default_income_groups(),
                               p = 1) {
 
   ind_1 <- region <- highlight_ind_1 <- year <- NULL # or use the .data pronoun
@@ -292,8 +304,8 @@ plot_bar_wdi_ind <- function(indicator = "NY.GDP.PCAP.KD",
                              start = lubridate::year(Sys.Date()) - 10,
                              end = lubridate::year(Sys.Date()),
                              country = "all",
-                             regions = wdiquickplots:::regions,
-                             income_groups = wdiquickplots:::income_groups,
+                             regions = default_regions(),
+                             income_groups = default_income_groups(),
                              base_color = "skyblue",
                              highlight_color = "red") {
 
@@ -366,8 +378,8 @@ plot_time_facets_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots:::regions,
-                              income_groups = wdiquickplots:::income_groups,
+                              regions = default_regions(),
+                              income_groups = default_income_groups(),
                               p = 1) {
 
   region <- year <- ind_1 <- highlight_ind_1 <- NULL
@@ -415,8 +427,8 @@ plot_time_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots:::regions,
-                              income_groups = wdiquickplots:::income_groups) {
+                              regions = default_regions(),
+                              income_groups = default_income_groups()) {
 
   # TODO: allow transformation passing p as in otherss
 
@@ -473,8 +485,8 @@ plot_spaghetti_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots:::regions,
-                              income_groups = wdiquickplots:::income_groups) {
+                              regions = default_regions(),
+                              income_groups = default_income_groups()) {
 
   # TODO: allow transformation passing p as in otherss
 
@@ -522,8 +534,8 @@ plot_race_wdi_ind <- function(indicator = "SI.POV.GINI",
                               start = lubridate::year(Sys.Date()) - 10,
                               end = lubridate::year(Sys.Date()),
                               country = "all",
-                              regions = wdiquickplots:::regions,
-                              income_groups = wdiquickplots:::income_groups,
+                              regions = default_regions(),
+                              income_groups = default_income_groups(),
                               p = 1) {
 
   # TODO: allow transformation passing p as in otherss
@@ -673,6 +685,7 @@ modulus_breaks <- function(p_custom, n.breaks_default = 10) {
   }
 }
 
+# TODO: improve it, to better display decimals when necesary and %
 get_formatter <- function(plot_data) {
   if (all(plot_data >= 0 & plot_data <= 1)) {
     return(scales::percent_format(accuracy = 1))
@@ -700,8 +713,8 @@ plot_bubble_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    start = lubridate::year(Sys.Date()) - 10,
                                    end = lubridate::year(Sys.Date()),
                                    country = "all",
-                                   regions = wdiquickplots:::regions,
-                                   income_groups = wdiquickplots:::income_groups) {
+                                   regions = default_regions(),
+                                   income_groups = default_income_groups()) {
 
   # TODO: format numbers
   # TODO: allow modulus transformations, receiving p_x and p_y
@@ -783,8 +796,8 @@ plot_bubble_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    start = lubridate::year(Sys.Date()) - 10,
                                    end = lubridate::year(Sys.Date()),
                                    country = "all",
-                                   regions = wdiquickplots:::regions,
-                                   income_groups = wdiquickplots:::income_groups,
+                                   regions = default_regions(),
+                                   income_groups = default_income_groups(),
                                    p_x = 1,
                                    p_y = 1) {
 
@@ -870,14 +883,14 @@ plot_bubble_anime_gg_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    start = lubridate::year(Sys.Date()) - 10,
                                    end = lubridate::year(Sys.Date()),
                                    country = "all",
-                                   regions = wdiquickplots:::regions,
-                                   income_groups = wdiquickplots:::income_groups,
+                                   regions = default_regions(),
+                                   income_groups = default_income_groups(),
                                    p_x = 1,
                                    p_y = 1) {
 
   # TODO: allow some control over colors?, highlighted vs. rest?, regions?, inc?
 
-  ind_1 <- ind_2 <- ind_3 <- alpha <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
+  ind_1 <- ind_2 <- ind_3 <- alpha <- year <- highlighted_country <- is_highlight <- NULL # or use the .data pronoun
 
   wdi_data <- download_wdi_ind(
     c(x_indicator, y_indicator, size_indicator), highlight_countries, start,
@@ -962,8 +975,8 @@ plot_bubble_anime_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
                                    start = lubridate::year(Sys.Date()) - 20,
                                    end = lubridate::year(Sys.Date()),
                                    country = "all",
-                                   regions = wdiquickplots:::regions,
-                                   income_groups = wdiquickplots:::income_groups) {
+                                   regions = default_regions(),
+                                   income_groups = default_income_groups()) {
 
   # TODO: format numbers
   # TODO: allow modulus transformations, receiving p_x and p_y
@@ -1027,8 +1040,12 @@ plot_bubble_anime_ly_wdi_ind <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 }
 
 
+#' Return special character codes
+#'
+#' Auxiliary function to return superscript numbers
+#'
+#' @param col_name name of the column indicator; ind_1, ind2, ..., ind_n
 get_char_code <- function(col_name) {
-
   char_codes <- c("\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075")
   col_index <- as.numeric(sub("ind_", "", col_name))
   if (col_index > 5) {
@@ -1038,13 +1055,23 @@ get_char_code <- function(col_name) {
   }
 }
 
-interpolate_wdi <- function(wdi_data = download_wdi_ind(c("SH.XPD.GHED.GD.ZS", "SH.SGR.CRSK.ZS"))) {
+#' Interpolate missing values in indicator variables
+#'
+#' most probably, there will be missing values in some countries for some years
+#' so here's a controversial decision to make the animations look good. Let's
+#' fill missing values for each country, by interpolating values in the gaps and
+#' filling with the first or last value available
+#'
+#' @param wdi_data dataset to interpolate, as returned by download_wdi_ind
+#'
+#' @return a data.frame with interpolated values and additional column
+#'         indicating which indicators, for which year and country were
+#'         interpolated
+interpolate_wdi <- function(wdi_data) {
+
+  country <- year <- NULL
 
   interpolated_data <- wdi_data %>%
-    # most probably, there will be missing values in some countries for some years
-    # so here's a controversial decision to make the animation look good
-    # let's fill missing values for each country, by interpolating values in
-    # the gaps and filling with the first or last value available
     tidyr::complete(country, year) %>% # now there could be NA in ind_i
     mutate(across(
       .cols = starts_with("ind_"),

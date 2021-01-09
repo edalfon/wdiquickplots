@@ -12,8 +12,8 @@ plot_bubble_anime_ly_wdi_ind(
   start = lubridate::year(Sys.Date()) - 20,
   end = lubridate::year(Sys.Date()),
   country = "all",
-  regions = wdiquickplots:::regions,
-  income_groups = wdiquickplots:::income_groups
+  regions = default_regions(),
+  income_groups = default_income_groups()
 )
 }
 \arguments{
@@ -36,7 +36,7 @@ This argument is passed as is to WDI::WDI and hence, requires
 \item{regions}{character vector to filter the data only to specific regions}
 
 \item{income_groups}{character vector to filter the data only to specific
-sincome groups}
+income groups}
 }
 \value{
 a plotly object

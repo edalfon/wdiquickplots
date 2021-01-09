@@ -2,7 +2,7 @@
 % Please edit documentation in R/quickplots.R
 \name{download_wdi_ind}
 \alias{download_wdi_ind}
-\title{Wrapper around WDI::WDI() to download data for a single indicator}
+\title{Download WDI data and prepare the dataset for the plots}
 \usage{
 download_wdi_ind(
   indicator = "NY.GDP.PCAP.KD",
@@ -10,8 +10,8 @@ download_wdi_ind(
   start = lubridate::year(Sys.Date()) - 10,
   end = lubridate::year(Sys.Date()),
   country = "all",
-  regions = wdiquickplots:::regions,
-  income_groups = wdiquickplots:::income_groups,
+  regions = default_regions(),
+  income_groups = default_income_groups(),
   interpolate = FALSE
 )
 }
@@ -31,7 +31,9 @@ This argument is passed as is to WDI::WDI and hence, requires
 \item{regions}{character vector to filter the data only to specific regions}
 
 \item{income_groups}{character vector to filter the data only to specific
-sincome groups}
+income groups}
+
+\item{interpolate}{boolean to indicate whether to interpolate missing values}
 }
 \value{
 data.frame with columns country, year, ind_1, region, income,
@@ -39,7 +41,8 @@ data.frame with columns country, year, ind_1, region, income,
         countries in which case, it takes the value of ind_1
 }
 \description{
-Wrapper around WDI::WDI() to download data for a single indicator
+Download data using a memoised version of WDI::WDI() and wrangle a bit
+with the data to prepare a data.frame for the plots#'
 }
 \examples{
 \dontrun{
