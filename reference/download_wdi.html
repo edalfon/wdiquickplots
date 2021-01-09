@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • wdiquickplots</title>
+<title>Download WDI data and prepare the dataset for the plots — download_wdi • wdiquickplots</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,9 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Download WDI data and prepare the dataset for the plots — download_wdi" />
+<meta property="og:description" content="Download data using a memoised version of WDI::WDI() and wrangle a bit
+with the data to prepare a data.frame for the plots#'" />
 
 
 
@@ -68,7 +70,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -130,106 +132,82 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Download WDI data and prepare the dataset for the plots</h1>
+    <small class="dont-index">Source: <a href='https://github.com/edalfon/wdiquickplots/blob/master/R/quickplots.R'><code>R/quickplots.R</code></a></small>
+    <div class="hidden name"><code>download_wdi.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Download data using a memoised version of WDI::WDI() and wrangle a bit
+with the data to prepare a data.frame for the plots#'</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>download_wdi</span><span class='op'>(</span>
+  indicator <span class='op'>=</span> <span class='st'>"NY.GDP.PCAP.KD"</span>,
+  highlight_countries <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span>,
+  start <span class='op'>=</span> <span class='fu'>lubridate</span><span class='fu'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/year.html'>year</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.Date</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>-</span> <span class='fl'>10</span>,
+  end <span class='op'>=</span> <span class='fu'>lubridate</span><span class='fu'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/year.html'>year</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.Date</a></span><span class='op'>(</span><span class='op'>)</span> <span class='op'>-</span> <span class='fu'><a href='https://rdrr.io/r/base/weekday.POSIXt.html'>months</a></span><span class='op'>(</span><span class='fl'>18</span><span class='op'>)</span><span class='op'>)</span>,
+  country <span class='op'>=</span> <span class='st'>"all"</span>,
+  regions <span class='op'>=</span> <span class='fu'><a href='default_regions.html'>default_regions</a></span><span class='op'>(</span><span class='op'>)</span>,
+  income_groups <span class='op'>=</span> <span class='fu'><a href='default_income_groups.html'>default_income_groups</a></span><span class='op'>(</span><span class='op'>)</span>,
+  interpolate <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-plots-" class="hasAnchor"><a href="#section-plots-" class="anchor"></a>Plots!</h2>
-          <p class="section-desc"><p>Functions to create quick plots from WDI data</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="plot_bar_wdi.html">plot_bar_wdi()</a></code> </p>
-        </td>
-        <td><p>Plot a WDI indicator as an interactive bar-plot (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_anime_gg_wdi.html">plot_bubble_anime_gg_wdi()</a></code> </p>
-        </td>
-        <td><p>Animated bubble plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_anime_ly_wdi.html">plot_bubble_anime_ly_wdi()</a></code> </p>
-        </td>
-        <td><p>Animated/dynamic bubble plot, interactive (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_gg_wdi.html">plot_bubble_gg_wdi()</a></code> </p>
-        </td>
-        <td><p>Bubble plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_ly_wdi.html">plot_bubble_ly_wdi()</a></code> </p>
-        </td>
-        <td><p>Bubble plot, interactive (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_dist_wdi.html">plot_dist_wdi()</a></code> </p>
-        </td>
-        <td><p>Plot the distribution (density) of a single indicator using WDI data,
-downloading the data as necessary for the period indicated by start and end,
-and keeping only the latest data point available for each country</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_dist_wdi_ggpdef.html">plot_dist_wdi_ggpdef()</a></code> </p>
-        </td>
-        <td><p>Plot a WDI indicator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_race_wdi.html">plot_race_wdi()</a></code> </p>
-        </td>
-        <td><p>Race bar plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_spaghetti_wdi.html">plot_spaghetti_wdi()</a></code> </p>
-        </td>
-        <td><p>Spaghetti plot that no-one really want to see (nor should want to see, ever)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_time_facets_wdi.html">plot_time_facets_wdi()</a></code> </p>
-        </td>
-        <td><p>Line plot with facets showing how the indicator has changed over time
-in the highlight_countries, within regions or income groups (facets)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_time_wdi.html">plot_time_wdi()</a></code> </p>
-        </td>
-        <td><p>Line plot (plotly-powered) the indicator over time (year) for the
-highlight_countries only</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>indicator</th>
+      <td><p>character of length 1 with the indicator code</p></td>
+    </tr>
+    <tr>
+      <th>highlight_countries</th>
+      <td><p>character vector with country names to highlight</p></td>
+    </tr>
+    <tr>
+      <th>start</th>
+      <td><p>first year to download data</p></td>
+    </tr>
+    <tr>
+      <th>end</th>
+      <td><p>last year to download data</p></td>
+    </tr>
+    <tr>
+      <th>country</th>
+      <td><p>subset of countries to download data from. Default to "all".
+This argument is passed as is to WDI::WDI and hence, requires
+'ISO-2 character codes, e.g. "BR", "US", "CA"'.</p></td>
+    </tr>
+    <tr>
+      <th>regions</th>
+      <td><p>character vector to filter the data only to specific regions</p></td>
+    </tr>
+    <tr>
+      <th>income_groups</th>
+      <td><p>character vector to filter the data only to specific
+income groups</p></td>
+    </tr>
+    <tr>
+      <th>interpolate</th>
+      <td><p>boolean to indicate whether to interpolate missing values</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>data.frame with columns country, year, ind_1, region, income,
+        highlight_ind_1. highlight_ind_1 = NA, except for highlight
+        countries in which case, it takes the value of ind_1</p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
+<span class='fu'>download_wdi</span><span class='op'>(</span><span class='st'>"NY.GDP.PCAP.KD"</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"Colombia"</span>, <span class='st'>"Germany"</span><span class='op'>)</span>, <span class='fl'>2019</span>, <span class='fl'>2019</span><span class='op'>)</span>
+<span class='op'>}</span>
+
+</div></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>

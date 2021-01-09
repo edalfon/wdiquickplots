@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • wdiquickplots</title>
+<title>Interpolate missing values in indicator variables — interpolate_wdi • wdiquickplots</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,11 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Interpolate missing values in indicator variables — interpolate_wdi" />
+<meta property="og:description" content="most probably, there will be missing values in some countries for some years
+so here's a controversial decision to make the animations look good. Let's
+fill missing values for each country, by interpolating values in the gaps and
+filling with the first or last value available" />
 
 
 
@@ -68,7 +72,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -130,106 +134,38 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Interpolate missing values in indicator variables</h1>
+    <small class="dont-index">Source: <a href='https://github.com/edalfon/wdiquickplots/blob/master/R/quickplots.R'><code>R/quickplots.R</code></a></small>
+    <div class="hidden name"><code>interpolate_wdi.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>most probably, there will be missing values in some countries for some years
+so here's a controversial decision to make the animations look good. Let's
+fill missing values for each country, by interpolating values in the gaps and
+filling with the first or last value available</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>interpolate_wdi</span><span class='op'>(</span><span class='va'>wdi_data</span><span class='op'>)</span></pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-plots-" class="hasAnchor"><a href="#section-plots-" class="anchor"></a>Plots!</h2>
-          <p class="section-desc"><p>Functions to create quick plots from WDI data</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="plot_bar_wdi.html">plot_bar_wdi()</a></code> </p>
-        </td>
-        <td><p>Plot a WDI indicator as an interactive bar-plot (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_anime_gg_wdi.html">plot_bubble_anime_gg_wdi()</a></code> </p>
-        </td>
-        <td><p>Animated bubble plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_anime_ly_wdi.html">plot_bubble_anime_ly_wdi()</a></code> </p>
-        </td>
-        <td><p>Animated/dynamic bubble plot, interactive (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_gg_wdi.html">plot_bubble_gg_wdi()</a></code> </p>
-        </td>
-        <td><p>Bubble plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_bubble_ly_wdi.html">plot_bubble_ly_wdi()</a></code> </p>
-        </td>
-        <td><p>Bubble plot, interactive (powered by plotly)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_dist_wdi.html">plot_dist_wdi()</a></code> </p>
-        </td>
-        <td><p>Plot the distribution (density) of a single indicator using WDI data,
-downloading the data as necessary for the period indicated by start and end,
-and keeping only the latest data point available for each country</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_dist_wdi_ggpdef.html">plot_dist_wdi_ggpdef()</a></code> </p>
-        </td>
-        <td><p>Plot a WDI indicator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_race_wdi.html">plot_race_wdi()</a></code> </p>
-        </td>
-        <td><p>Race bar plot</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_spaghetti_wdi.html">plot_spaghetti_wdi()</a></code> </p>
-        </td>
-        <td><p>Spaghetti plot that no-one really want to see (nor should want to see, ever)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_time_facets_wdi.html">plot_time_facets_wdi()</a></code> </p>
-        </td>
-        <td><p>Line plot with facets showing how the indicator has changed over time
-in the highlight_countries, within regions or income groups (facets)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="plot_time_wdi.html">plot_time_wdi()</a></code> </p>
-        </td>
-        <td><p>Line plot (plotly-powered) the indicator over time (year) for the
-highlight_countries only</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>wdi_data</th>
+      <td><p>dataset to interpolate, as returned by download_wdi</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>a data.frame with interpolated values and additional column
+        indicating which indicators, for which year and country were
+        interpolated</p>
+
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
