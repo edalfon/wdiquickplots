@@ -1,4 +1,13 @@
 url: ~
 template:
-  bootstrap: 5
+  params:
+    bootswatch: cerulean
+    ganalytics: G-3E8SNHMP6Y
+  bootstrap: 3
 
+reference:
+
+- title: "Plots!"
+  desc: Functions to create quick plots from WDI data
+- contents:
+  - starts_with("plot_")
