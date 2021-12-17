@@ -102,6 +102,7 @@ webshotme <- function(htmlwidget, ...) {
 # wdiquickplots
 
 <!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/edalfon/wdiquickplots/branch/master/graph/badge.svg)](https://app.codecov.io/gh/edalfon/wdiquickplots?branch=master)
 <!-- badges: end -->
 
 The goal of `wdiquickplots` is to provide, well, quick plots for World

@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Codecov test
+coverage](https://codecov.io/gh/edalfon/wdiquickplots/branch/master/graph/badge.svg)](https://app.codecov.io/gh/edalfon/wdiquickplots?branch=master)
 <!-- badges: end -->
 
 The goal of `wdiquickplots` is to provide, well, quick plots for World
@@ -40,19 +42,19 @@ plot_dist_wdi("NY.GDP.PCAP.PP.CD", p = 0)
 <img src="man/figures/README-dist-1.svg" width="47%" style="display: block; margin: auto;" />
 
 There you go. That’s the spirit of this package. One line of code and
-bang\!, a relatively decent plot that you can put in your slides to
+bang!, a relatively decent plot that you can put in your slides to
 convey a quick message.
 
 Using this package goes as follows:
 
-  - Find the code of the indicator of interest. You can use
+-   Find the code of the indicator of interest. You can use
     `WDI::WDIsearch` for this, but I actually find it a bit more
     user-friendly to simply go to the [indicators page
     (https://data.worldbank.org/indicator)](https://data.worldbank.org/indicator)
     and get the code from there (it’s in the URL).
-  - You pass the indicator code as the first argument of the different
+-   You pass the indicator code as the first argument of the different
     plotting functions in this package.
-  - As second argument, you pass the countries you want to highlight.
+-   As second argument, you pass the countries you want to highlight.
 
 And that’s it.
 
@@ -62,8 +64,8 @@ site for this little package](https://edalfon.github.io/wdiquickplots/)
 also see examples for all the quick plots in this package, but in
 general, they quickly show:
 
-  - Where the highlighted countries stand in terms of the indicator of
+-   Where the highlighted countries stand in terms of the indicator of
     interest.
-  - How do they compare among highlighted countries, and against the
+-   How do they compare among highlighted countries, and against the
     rest of the world, regions or income groups.
-  - What have been the changes in time.
+-   What have been the changes in time.

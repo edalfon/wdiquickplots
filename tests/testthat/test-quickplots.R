@@ -53,3 +53,7 @@ test_that("modulus_breaks do not make things too weird", {
   )
 })
 
+# TODO: add tests for the plots
+# https://stackoverflow.com/questions/31038709/how-to-write-a-test-for-a-ggplot-plot
+# https://github.com/r-lib/vdiffr
+
