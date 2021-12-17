@@ -7,6 +7,7 @@
 
 [![Codecov test
 coverage](https://codecov.io/gh/edalfon/wdiquickplots/branch/master/graph/badge.svg)](https://app.codecov.io/gh/edalfon/wdiquickplots?branch=master)
+[![R-CMD-check](https://github.com/edalfon/wdiquickplots/workflows/R-CMD-check/badge.svg)](https://github.com/edalfon/wdiquickplots/actions)
 <!-- badges: end -->
 
 The goal of `wdiquickplots` is to provide, well, quick plots for World

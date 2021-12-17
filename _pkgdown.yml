@@ -12,7 +12,7 @@ reference:
 - contents:
   - starts_with("plot_")
 
-- title: "`{WDI}` wrappers"
+- title: "{WDI} wrappers"
   desc: Fns to get the data, using `{WDI}`
 - contents:
   - download_wdi
