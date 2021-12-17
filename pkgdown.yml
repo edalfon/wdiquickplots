@@ -1,8 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.1
 pkgdown_sha: ~
 articles:
   features: features.html
   wdiquickplots: wdiquickplots.html
-last_built: 2021-01-09T22:11Z
+last_built: 2021-12-17T13:52Z
 
