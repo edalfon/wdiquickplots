@@ -29,3 +29,4 @@ and combine them, expressing all in the original scale
 
 Take a look at scales::log_breaks and ?scales::log_trans
 }
+\keyword{internal}

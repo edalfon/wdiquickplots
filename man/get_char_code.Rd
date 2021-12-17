@@ -12,3 +12,4 @@ get_char_code(col_name)
 \description{
 Auxiliary function to return superscript numbers
 }
+\keyword{internal}

@@ -979,6 +979,7 @@ plot_bubble_anime_ly_wdi <- function(x_indicator = "SH.XPD.GHED.GD.ZS",
 #' Auxiliary function to return superscript numbers
 #'
 #' @param col_name name of the column indicator; ind_1, ind2, ..., ind_n
+#' @keywords internal
 get_char_code <- function(col_name) {
   char_codes <- c("\u00b9", "\u00b2", "\u00b3", "\u2074", "\u2075")
   col_index <- as.numeric(sub("ind_", "", col_name))
@@ -1001,6 +1002,7 @@ get_char_code <- function(col_name) {
 #' @return a data.frame with interpolated values and additional column
 #'         indicating which indicators, for which year and country were
 #'         interpolated
+#' @keywords internal
 interpolate_wdi <- function(wdi_data) {
 
   country <- year <- NULL
@@ -1032,6 +1034,7 @@ interpolate_wdi <- function(wdi_data) {
 }
 
 #' Default regions, just to avoid repeating so many lines in all functions
+#' @noRd
 default_regions <- function() {
   c(
     "Middle East & North Africa",
@@ -1045,6 +1048,7 @@ default_regions <- function() {
 }
 
 #' Default income groups, just to avoid repeating so many lines in all functions
+#' @noRd
 default_income_groups <- function() {
   c(
     "Aggregates",
@@ -1074,6 +1078,7 @@ default_income_groups <- function() {
 #' @param n.breaks_default number of breaks
 #'
 #' @return numeric vector with the breaks
+#' @keywords internal
 modulus_breaks <- function(p_custom, n.breaks_default = 10) {
 
   function(limits, p = p_custom, n.breaks = n.breaks_default) {
@@ -1107,6 +1112,7 @@ modulus_breaks <- function(p_custom, n.breaks_default = 10) {
 #' @param plot_data indicator data, including label
 #'
 #' @return a formatter function from the scales package
+#' @keywords internal
 get_formatter <- function(plot_data) {
 
   ind_label <- attr(plot_data, "label")

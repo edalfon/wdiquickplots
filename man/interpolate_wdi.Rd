@@ -20,3 +20,4 @@ so here's a controversial decision to make the animations look good. Let's
 fill missing values for each country, by interpolating values in the gaps and
 filling with the first or last value available
 }
+\keyword{internal}
